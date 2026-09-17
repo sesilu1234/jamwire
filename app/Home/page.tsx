@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: BRAND.name,
     images: [
       {
-        url: `${siteUrl}${BRAND.logo}`,
+        url: `${siteUrl}${BRAND.ogImage}`,
         width: 1200, // Standard OG size
         height: 630,
         alt: `${BRAND.name} - Global Jam Session Map`,
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: `${BRAND.name} | Global Jam Session Map`,
     description: 'Find where the music happens tonight.',
-    images: [`${siteUrl}${BRAND.logo}`],
+    images: [`${siteUrl}${BRAND.ogImage}`],
   },
 };
 
@@ -99,7 +99,7 @@ export default async function HomePage() {
           name: jam.location_title || 'Venue',
           address: { '@type': 'PostalAddress', streetAddress: jam.location_address || '' },
         },
-        image: jam.images?.[0] || `${siteUrl}${BRAND.logo}`,
+        image: jam.images?.[0] || `${siteUrl}${BRAND.ogImage}`,
         description: `Join the ${jam.jam_title} at ${jam.location_title}.`,
       },
     })),

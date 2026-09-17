@@ -17,6 +17,8 @@
   son las jams y eplicacion..eso igual quitarlo pues queda mal ... o ponerlo
   despues de cities, o mejorarlo con colores....)
 
+- namechange :
+
 What you must do manually 🔴 Blocking — before the new domain works Buy/point
 jamwire.xyz, then change one line: BRAND.siteUrl in lib/brand.ts:35. Everything
 else follows automatically. Two GitHub workflow URLs still POST to

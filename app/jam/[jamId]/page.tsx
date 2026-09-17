@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [jam.images?.[0] || BRAND.logo],
+      images: [jam.images?.[0] || BRAND.ogImage],
     },
   };
 }
@@ -101,7 +101,7 @@ const simpleDescription = `${eventType} at ${jam.location_title}, ${city}. Open 
       }
     },
     "description": simpleDescription,
-    "image": jam.images?.[0] || `${BRAND.siteUrl}${BRAND.logo}`,
+    "image": jam.images?.[0] || `${BRAND.siteUrl}${BRAND.ogImage}`,
     "url": `${BRAND.siteUrl}/jam/${jam.slug}`,
     "offers": {
       "@type": "Offer",

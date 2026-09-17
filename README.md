@@ -1,86 +1,69 @@
+<div align="center">
 
-# Jamwire
+<img src="public/jamwire_icon.png" alt="Jamwire" width="420" />
 
-Find the next spot where music happens — a live map of jam sessions and open
-mics. Formerly called Jamspots; the repo folder and some infrastructure names
-still carry the old name (see `lib/brand.ts`).
+### 🎸 Find the next spot where music happens.
 
-Brand strings and the logo come from `lib/brand.ts`. To swap the logo, replace
-`public/jamwire_icon.png`.
+A live map of jam sessions and open mics — the recurring, unticketed,
+show-up-and-play kind.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with
-[`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+[![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-58C4DC?logo=react&logoColor=white)](https://react.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20+%20PostGIS-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Tailwind](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-000?logo=vercel&logoColor=white)](https://vercel.com)
 
+</div>
 
-Jamspots is a web app for finding and joining local jam sessions, whether you are looking for a place to play, a place to listen, or a way to host something yourself. 🎸
+---
 
-The idea is simple: music events happen all the time, but they are not always easy to find. Jamspots brings them into one place so people can discover what is happening nearby and decide quickly if they want to join. ✨
-
-Live app: https://jamspots.xyz
-
-## What it does 🔎
-
-Jamspots helps users:
-
-- discover jam sessions and open mics in different cities and neighborhoods 🗺️
-- browse events through an interactive map
-- filter sessions by location, date, and type 🧭
-- create and manage sessions as a host 🎤
-- share updates and context around each session 💬
-- support recurring weekly events 🔁
-
-## Problems it tries to solve 💡
-
-A lot of local music gatherings are shared informally through word of mouth, private chats, or scattered posts. That makes them hard to find and easy to miss. 
-
-Jamspots aims to make that discovery process simpler by giving users a clear, searchable, location-based experience. 🌍
-
-## How it works ⚙️
-
-The app combines a frontend experience with a backend data layer:
-
-- users can browse and search for sessions
-- hosts can create and manage their own events
-- sessions are stored and retrieved through a database-backed workflow
-- location and map-based interactions make it easier to discover nearby activities
-
-## Stack 🛠️
-
-The project is built with:
-
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- Supabase
-- NextAuth
-- Google Maps / map-based UI
-- Radix UI
-
-## Project structure 📁
-
-- app/ — main pages and route-level app logic
-- components/ — reusable UI and feature components
-- lib/ — helpers, integrations, and shared logic
-- app/api/ — server-side routes and backend operations
-- types/ — shared TypeScript types
-
-## Getting started 🚀
-
-Install dependencies:
+## 🚀 Run it
 
 ```bash
 pnpm install
+pnpm dev        # → http://localhost:3000
 ```
 
-Run the development server:
+You'll need a `.env.local` with Supabase, Google Maps, NextAuth and Upstash
+keys. Other scripts: `pnpm build`, `pnpm lint`, `pnpm format`.
 
-```bash
-pnpm dev
-```
+## 🗺️ What's where
 
-Then open http://localhost:3000.
+| Path                               | What lives there                                     |
+| ---------------------------------- | ---------------------------------------------------- |
+| `app/Home`                         | The map + card feed — the product                    |
+| `app/[locationSlug]`               | Per-city pages (SEO landing pages)                   |
+| `app/jam/[jamId]`                  | A single jam, with JSON-LD for rich results          |
+| `app/createJam`                    | Host flow: place picker, dates, photos               |
+| `app/api/public`                   | Unauthenticated reads: markers, cards, geocoding     |
+| `app/api/private`                  | Authenticated writes: create / update / delete       |
+| `lib/brand.ts`                     | 🎨 Name, tagline, logo, domain — **all in one file** |
+| `cron_jobs/` + `.github/workflows` | Date rollovers, priority scoring, backups            |
 
-## Notes ✌️
+## 🎨 Branding
 
-This project is meant to be practical and user-focused rather than purely academic. It is built around a concrete use case and a fairly straightforward product experience. 🎶
+Every user-facing string and image reads from [`lib/brand.ts`](lib/brand.ts).
+Rename the app, swap the tagline or change the logo there and it propagates
+everywhere — page titles, metadata, the header, the social card.
+
+- **Logo** → replace `public/jamwire_icon.png`
+- **Social preview** → generated at build time by
+  [`app/opengraph-image.tsx`](app/opengraph-image.tsx), so it can never drift
+  out of sync
+- **Icons** → `app/icon.png`, `app/apple-icon.png`, `app/favicon.ico`
+
+> **A note on the old name.** This was called _Jamspots_. The repo folder, the
+> Supabase bucket (`jamspots_imageBucket`) and the S3 backup bucket
+> (`jamspots-pg-dump`) still say so on purpose — renaming a bucket breaks every
+> image URL already stored in the database, for zero user-visible benefit.
+
+## 🤝 Adding a jam
+
+Anyone can add one through the site — no special access needed. Host a weekly
+jam or an open mic? Put it on the map. That's the whole point.
+
+<div align="center">
+
+**[jamwire.xyz](https://jamwire.xyz)**
+
+</div>
