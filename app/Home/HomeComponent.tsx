@@ -18,6 +18,7 @@ import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
 
 import CitiesSection from './CitiesSection';
+import SiteFooter from '@/components/SiteFooter';
 
 interface HomeComponentProps {
   cards: JamCard[];
@@ -149,53 +150,7 @@ export default function HomeComponent({
         <CitiesSection />
       </div>
 
-      <footer className="hidden md:block w-full pb-12 mt-0 flex-1">
-        <div className="flex flex-col items-center justify-center max-w-[90%] w-[1300px] mx-auto p-6 pt-12 h-full border-t-2 border-primary-1">
-          {/* Contenedor Principal (Links + Branding) */}
-          <div className="flex items-center justify-center gap-12 w-full mb-8">
-            {/* Navigation Links */}
-            <div className="flex flex-col text-tone-1/95 items-between justify-between gap-4">
-              <Link
-                href="/contact"
-                className="hover:text-tone-0 cursor-pointer"
-              >
-                CONTACT
-              </Link>
-              <Link href="/help" className="hover:text-tone-0 cursor-pointer">
-                HELP
-              </Link>
-              <Link href="/about" className="hover:text-tone-0 cursor-pointer">
-                ABOUT
-              </Link>
-            </div>
-
-            {/* Branding / Tagline */}
-            <div className="flex flex-col sm:flex-row items-end justify-center gap-2">
-              <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
-              <p className="text-sm text-center font-medium sm:text-left pb-3">
-                {BRAND.tagline}
-              </p>
-            </div>
-          </div>
-
-          {/* SECCIÓN DE COPYRIGHT Y LEGAL */}
-          <div className="w-full flex flex-col items-center border-t border-tone-1/10 pt-6 text-xs text-tone-1/60 gap-2">
-            <p>
-              © {new Date().getFullYear()}{' '}
-              <span className="font-bold">{BRAND.name}</span>. All rights
-              reserved.
-            </p>
-            <div className="flex gap-4">
-              <Link
-                href="/privacy"
-                className="hover:underline hover:text-tone-0"
-              >
-                Privacy Policy
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter className="hidden md:block" />
 
       {/* Phone-only tab bar. Desktop keeps the header nav + footer links. */}
       <nav
@@ -221,7 +176,6 @@ export default function HomeComponent({
           </Link>
         ))}
       </nav>
-
     </div>
   );
 }

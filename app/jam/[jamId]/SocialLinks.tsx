@@ -43,16 +43,14 @@ export default function SocialLinks({ socialLinks }: SocialLinksProps) {
             {/* shrink-0 prevents the icon from squishing */}
             <Icon className="w-5 h-5  group-hover:text-tone-0 shrink-0" />
 
-            <div className="flex flex-col overflow-hidden">
+            {/* min-w-0 lets this flex child shrink below its content width;
+                without it a long URL pushes the row past the viewport. */}
+            <div className="flex min-w-0 flex-col">
               <span className="text-xs font-medium text-tone-0/40 uppercase tracking-wider">
                 {label}
               </span>
-              <span className="truncate text-sm font-medium group-hover:underline decoration-tone-0/30 underline-offset-4">
-                <span className="truncate text-sm font-medium group-hover:underline decoration-white/30 underline-offset-4">
-                  {url
-                    .replace(/^(https?:\/\/)?(www\.)?/, '')
-                    .replace(/\/$/, '')}
-                </span>
+              <span className="block truncate text-sm font-medium group-hover:underline decoration-tone-0/30 underline-offset-4">
+                {url.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '')}
               </span>
             </div>
           </a>

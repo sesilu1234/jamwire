@@ -211,7 +211,7 @@
   --collapse-butt: #1e293b;
 
   --text-tone-modality-jam: oklch(80% 0.12 150); /* Bright Mint Glow */
-  --text-tone-modality-open-mic: oklch(85% 0.01 200); /* Moonlight Silver */
+  --text-tone-modality-open-mic: oklch(80% 0.14 300); /* Violet — open mic */
 
   --primary-1: oklch(58% 0.1 235); /* soft steel blue */
   --secondary-1: oklch(70% 0.06 210);
@@ -269,7 +269,7 @@
   --collapse-butt: #3b3529;
 
   --text-tone-modality-jam: oklch(80% 0.12 150); /* Bright Mint Glow */
-  --text-tone-modality-open-mic: oklch(85% 0.01 200); /* Moonlight Silver */
+  --text-tone-modality-open-mic: oklch(80% 0.14 300); /* Violet — open mic */
 
   --primary-1: oklch(62% 0.09 60); /* soft peach */
   --secondary-1: oklch(72% 0.06 85); /* warm off-white */
@@ -327,7 +327,7 @@
   --collapse-butt: #41556d;
 
   --text-tone-modality-jam: oklch(80% 0.12 150); /* Bright Mint Glow */
-  --text-tone-modality-open-mic: oklch(85% 0.01 200); /* Moonlight Silver */
+  --text-tone-modality-open-mic: oklch(80% 0.14 300); /* Violet — open mic */
 
   --primary-1: oklch(65% 0.18 235);
   --secondary-1: oklch(75% 0.12 200);
@@ -450,7 +450,7 @@
   --collapse-butt: #472f2d;
 
   --text-tone-modality-jam: oklch(80% 0.12 150); /* Bright Mint Glow */
-  --text-tone-modality-open-mic: oklch(85% 0.01 200); /* Moonlight Silver */
+  --text-tone-modality-open-mic: oklch(80% 0.14 300); /* Violet — open mic */
 
   --primary-1: oklch(65% 0.16 135);
   --secondary-1: oklch(72% 0.12 105);
@@ -493,8 +493,7 @@
   overflow-y: auto; /* vertical scroll if needed */
 }
 
-
-  @media (min-width: 768px) {
+@media (min-width: 768px) {
   .card-container::-webkit-scrollbar {
     width: 12px;
   }
@@ -513,27 +512,18 @@
   }
 }
 
-
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
   .card-container::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 5px;
     display: block !important; /* Force display */
   }
 
-
-  
-
   .card-container::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.3); /* Make it darker/more visible */
     border-radius: 5px;
   }
-
-
 }
-
-
-
 
 .newspaper {
   background: #b1b1b1;
