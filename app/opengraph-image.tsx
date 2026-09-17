@@ -7,25 +7,38 @@ import { BRAND } from '@/lib/brand';
  * The social preview card (WhatsApp, Twitter/X, Facebook, Slack, Discord).
  *
  * Generated rather than shipped as a static file so it can never drift from
- * `lib/brand.ts` — change the name, tagline or logo there and this follows.
- * 1200x630 is the size every platform crops from; anything else letterboxes.
+ * `lib/brand.ts` — replace the logo there and this follows.
  *
- * SAFE ZONE: several clients (the WhatsApp composer, Slack compact mode,
- * Telegram, Discord) don't show the wide card at all — they centre-crop it to
- * a square thumbnail. That crop keeps only the middle 630x630, so everything
- * that must stay readable lives inside SAFE_W below. Widen the logo past that
- * and the ends of the wordmark get sliced off.
+ * Deliberately just the wordmark on a flat field. Two reasons:
+ *
+ * 1. Every client renders the title and description as real text beside the
+ *    image, so a tagline baked into the picture is duplicated — and at
+ *    thumbnail size it degrades into unreadable grey mush.
+ * 2. Several clients (the WhatsApp composer, Slack compact, Telegram,
+ *    Discord) centre-crop this to a square and display it around 200px wide.
+ *    One mark survives that. A stacked layout does not.
+ *
+ * So: nothing here that has to be legible at 200px except the logo itself.
  */
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const alt = `${BRAND.name} — ${BRAND.tagline}`;
 
-/** Centre-crop width, minus a little breathing room. */
-const SAFE_W = 540;
+/**
+ * The square centre-crop keeps only the middle 630x630. The wordmark sits
+ * inside that with a margin, so it is never sliced.
+ */
+const LOGO_W = 560;
 
-const AMBER = '#f5a623';
-const INK = '#14100c';
+/** Logo is 876x191; keep the aspect ratio exact so it never distorts. */
+const LOGO_H = Math.round((LOGO_W * 191) / 876);
+
+/**
+ * Not pure black: the wordmark is drawn with a heavy black outline, which
+ * disappears into a near-black field and leaves the letters looking eroded.
+ */
+const INK = '#1b1714';
 
 export default async function OpengraphImage() {
   const logo = readFileSync(join(process.cwd(), 'public', 'jamwire_icon.png'));
@@ -37,61 +50,13 @@ export default async function OpengraphImage() {
         width: '100%',
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: INK,
-        backgroundImage: `radial-gradient(circle at 50% 8%, rgba(245,166,35,0.28) 0%, rgba(245,166,35,0) 62%)`,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          width: SAFE_W,
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} alt="" width={SAFE_W} height={118} />
-
-        <div
-          style={{
-            marginTop: 36,
-            // Narrower than SAFE_W so the tagline breaks into two even lines
-            // rather than leaving one orphan word on the second.
-            width: 440,
-            fontSize: 34,
-            lineHeight: 1.3,
-            color: '#f4ede4',
-            letterSpacing: -0.5,
-          }}
-        >
-          {BRAND.tagline}
-        </div>
-
-        <div
-          style={{
-            marginTop: 26,
-            fontSize: 24,
-            color: AMBER,
-            letterSpacing: 2,
-          }}
-        >
-          {BRAND.siteUrl.replace(/^https?:\/\//, '').toUpperCase()}
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          height: 10,
-          backgroundColor: AMBER,
-        }}
-      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={logoSrc} alt="" width={LOGO_W} height={LOGO_H} />
     </div>,
     size,
   );
