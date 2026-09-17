@@ -4,23 +4,25 @@ import { getHomeCards } from '@/lib/getHomeCards';
 import HomeComponent from './HomeComponent'; 
 import { JamCard } from '@/types/jam';
 import { Metadata } from 'next';
+import { BRAND } from '@/lib/brand';
 
-const siteUrl = 'https://jamspots.xyz';
+const siteUrl = BRAND.siteUrl;
 
 export const metadata: Metadata = {
-  title: 'Jamspots | Find Jam Sessions & Open Mics Near You',
+  // The root layout appends "| <brand>", so this must not repeat it.
+  title: 'Find Jam Sessions & Open Mics Near You',
   description: 'Discover where to play tonight. The world’s map for jam sessions and open mics for musicians and live music lovers.',
   openGraph: {
-    title: 'Jamspots | Find Jam Sessions & Open Mics',
+    title: `${BRAND.name} | Find Jam Sessions & Open Mics`,
     description: 'The world’s map for jam sessions and open mics.',
     url: siteUrl,
-    siteName: 'Jamspots',
+    siteName: BRAND.name,
     images: [
       {
-        url: `${siteUrl}/jamspots_icon.png`, 
+        url: `${siteUrl}${BRAND.logo}`,
         width: 1200, // Standard OG size
-        height: 630, 
-        alt: 'Jamspots - Global Jam Session Map',
+        height: 630,
+        alt: `${BRAND.name} - Global Jam Session Map`,
       },
     ],
     locale: 'en', // Generic English for the global music community
@@ -28,9 +30,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jamspots | Global Jam Session Map',
+    title: `${BRAND.name} | Global Jam Session Map`,
     description: 'Find where the music happens tonight.',
-    images: [`${siteUrl}/jamspots_icon.png`], 
+    images: [`${siteUrl}${BRAND.logo}`],
   },
 };
 
@@ -85,7 +87,7 @@ export default async function HomePage() {
     itemListElement: validJams.map((jam, index: number) => ({
       '@type': 'ListItem',
       position: index + 1,
-      url: `https://jamspots.xyz/jam/${jam.slug}`,
+      url: `${siteUrl}/jam/${jam.slug}`,
       item: {
         '@type': 'Event',
         name: jam.jam_title,
@@ -97,7 +99,7 @@ export default async function HomePage() {
           name: jam.location_title || 'Venue',
           address: { '@type': 'PostalAddress', streetAddress: jam.location_address || '' },
         },
-        image: jam.images?.[0] || 'https://jamspots.xyz/jamspots_icon.png',
+        image: jam.images?.[0] || `${siteUrl}${BRAND.logo}`,
         description: `Join the ${jam.jam_title} at ${jam.location_title}.`,
       },
     })),

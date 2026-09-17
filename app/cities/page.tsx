@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 const GLOBAL_CITIES = {
   "Europe": ["London", "Berlin", "Paris", "Madrid", "Barcelona", "Amsterdam", "Lisbon", "Rome", "Dublin", "Vienna", "Prague", "Copenhagen", "Stockholm"],
@@ -13,15 +15,11 @@ export default function CitiesPage() {
       {/* HEADER / LOGO AREA */}
       <div className="max-w-[1300px] w-[90%] mx-auto pt-10 pb-16">
         <Link href="/" className="inline-flex items-center gap-4 group">
-          <img 
-            src="/jamspots_icon.png" 
-            alt="Jamspots icon" 
-            className="h-10 w-auto object-contain group-hover:rotate-12 transition-transform duration-300" 
-          />
+          <BrandLogo className="h-10 w-auto object-contain group-hover:rotate-12 transition-transform duration-300" />
+          {/* The logo is itself a wordmark, so the name is not repeated here. */}
           <div className="flex flex-col border-l border-tone-0/10 pl-4">
-            <span className="text-xl font-black tracking-tighter leading-none">JAMSPOTS</span>
-            <p className="hidden sm:block text-[10px] uppercase tracking-widest text-gray-500 font-bold mt-1">
-              Find the next spot where music happens
+            <p className="hidden sm:block text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+              {BRAND.tagline}
             </p>
           </div>
         </Link>

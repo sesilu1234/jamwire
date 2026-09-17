@@ -3,18 +3,20 @@ import { getHomeCards } from '@/lib/getHomeCards';
 import HomeComponent from './HomeComponent'; 
 import { JamCard } from '@/types/jam';
 import { Metadata } from 'next';
+import { BRAND } from '@/lib/brand';
 
 const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
 export async function generateMetadata({ params }: { params: Promise<{ locationSlug: string }> }): Promise<Metadata> {
   const { locationSlug } = await params;
-  const siteUrl = 'https://jamspots.xyz';
+  const siteUrl = BRAND.siteUrl;
   
   // Formateo del nombre de la ciudad
   const cityName = decodeURIComponent(locationSlug).replace(/-/g, ' ');
   const capitalizedCity = cityName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-  const title = `Jam Sessions in ${capitalizedCity} | Jamspots`;
+  // The root layout appends "| <brand>", so this must not repeat it.
+  const title = `Jam Sessions in ${capitalizedCity}`;
   const description = `Discover the best open mics and jam sessions in ${capitalizedCity}. Live map, dates, and up-to-date schedules for local musicians.`;
 
   return {
@@ -24,10 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locationS
       title,
       description,
       url: `${siteUrl}/${locationSlug}`,
-      siteName: 'Jamspots',
+      siteName: BRAND.name,
       images: [
         {
-          url: `${siteUrl}/jamspots_icon.png`, // Puedes cambiar esto por una imagen de la ciudad si la tuvieras
+          url: `${siteUrl}${BRAND.logo}`, // Puedes cambiar esto por una imagen de la ciudad si la tuvieras
           width: 1200,
           height: 630,
           alt: `Jam Sessions in ${capitalizedCity}`,
@@ -40,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locationS
       card: 'summary_large_image',
       title,
       description,
-      images: [`${siteUrl}/jamspots_icon.png`],
+      images: [`${siteUrl}${BRAND.logo}`],
     },
   };
 }
@@ -123,7 +125,7 @@ export default async function CityPage({ params }: { params: Promise<{ locationS
     itemListElement: validJams.map((jam, index: number) => ({
       '@type': 'ListItem',
       position: index + 1,
-      url: `https://jamspots.xyz/jam/${jam.slug}`,
+      url: `${BRAND.siteUrl}/jam/${jam.slug}`,
       item: {
         '@type': 'Event',
         name: jam.jam_title,
@@ -139,7 +141,7 @@ export default async function CityPage({ params }: { params: Promise<{ locationS
             addressLocality: userLocation?.city || ''
           },
         },
-        image: jam.images?.[0] || 'https://jamspots.xyz/jamspots_icon.png',
+        image: jam.images?.[0] || `${BRAND.siteUrl}${BRAND.logo}`,
         description: `Join the ${jam.jam_title} at ${jam.location_title}. Open stage for musicians.`,
       },
     })),

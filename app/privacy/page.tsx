@@ -1,4 +1,5 @@
 import React from 'react';
+import { BRAND } from '@/lib/brand';
 
 export default function PrivacyPage() {
   return (
@@ -19,7 +20,7 @@ export default function PrivacyPage() {
             1. Information We Collect
           </h2>
           <p>
-            Jamspots is an informational platform. We do not require users to
+            {BRAND.name} is an informational platform. We do not require users to
             create an account to browse. If you contact us via email, we will
             only use your information to respond to your inquiry.
           </p>

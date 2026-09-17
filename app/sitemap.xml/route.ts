@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { BRAND } from '@/lib/brand';
 
 // Definición de ciudades globales para el directorio
 const GLOBAL_CITIES_DATA = {
@@ -25,7 +26,7 @@ const ALL_CITY_SLUGS = Object.values(GLOBAL_CITIES_DATA)
 
 export async function GET() {
   try {
-    const baseUrl = 'https://jamspots.xyz';
+    const baseUrl = BRAND.siteUrl;
 
     // 1. Fetch de los slugs de las Jams individuales desde Supabase
     // Traemos solo las jams para construir sus páginas de detalle

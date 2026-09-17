@@ -21,6 +21,8 @@ import { Separator } from '@/components/ui/separator';
 import CommentSection from './CommentSection';
 
 import { Space_Grotesk } from 'next/font/google';
+import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -70,14 +72,10 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
   className="ml-0 flex justify-end gap-2 items-end lg:w-118 lg:h-24 p-4 pb-2 pt-2 rounded-b-3xl
    shadow-[5px_0_6px_-1px_var(--tone-3),_-5px_0_6px_-1px_var(--tone-3),0_6px_6px_-1px_var(--tone-3)]"
 >
-  <img
-    src="/jamspots_icon.png"
-    alt="Jamspots icon"
-    className="h-16"
-  />
+  <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
 
   <p className="hidden lg:block text-xs py-4 text-text-2 font-semibold">
-    Find the next spot where music happens.
+    {BRAND.tagline}
   </p>
 </div>
           </Link>
@@ -201,13 +199,9 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
 
             {/* Branding / Tagline */}
             <div className="flex flex-col sm:flex-row items-end justify-center gap-2 ">
-              <img
-                src="/jamspots_icon.png"
-                alt="Jamspots icon"
-                className="h-16"
-              />
+              <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
               <p className="text-sm  text-center font-medium sm:text-left pb-3">
-                Find the next spot where music happens.
+                {BRAND.tagline}
               </p>
             </div>
           </div>

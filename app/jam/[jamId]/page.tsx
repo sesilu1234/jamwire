@@ -2,6 +2,7 @@
 import { getJam } from '@/lib/getJam';
 import JamComponent from './JamComponent';
 import { Metadata } from 'next';
+import { BRAND } from '@/lib/brand';
 import { notFound } from 'next/navigation';
 import { Jam } from '../types/jam';
 export type JamWithComments = Jam & {
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [jam.images?.[0] || '/jamspots_icon.png'],
+      images: [jam.images?.[0] || BRAND.logo],
     },
   };
 }
@@ -100,11 +101,11 @@ const simpleDescription = `${eventType} at ${jam.location_title}, ${city}. Open 
       }
     },
     "description": simpleDescription,
-    "image": jam.images?.[0] || "https://jamspots.xyz/jamspots_icon.png",
-    "url": `https://jamspots.xyz/jam/${jam.slug}`,
+    "image": jam.images?.[0] || `${BRAND.siteUrl}${BRAND.logo}`,
+    "url": `${BRAND.siteUrl}/jam/${jam.slug}`,
     "offers": {
       "@type": "Offer",
-      "url": `https://jamspots.xyz/jam/${jam.slug}`,
+      "url": `${BRAND.siteUrl}/jam/${jam.slug}`,
       "price": "0",
       "priceCurrency": currency, // Dinámico
       "availability": "https://schema.org/InStock",
@@ -112,8 +113,8 @@ const simpleDescription = `${eventType} at ${jam.location_title}, ${city}. Open 
     },
     "organizer": {
       "@type": "Organization",
-      "name": "JamSpots",
-      "url": "https://jamspots.xyz"
+      "name": BRAND.name,
+      "url": BRAND.siteUrl
     }
   };
 

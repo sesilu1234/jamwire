@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { useRouter } from 'next/navigation'; 
 import { z } from 'zod';
+import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 const MAX_MESSAGE_LENGTH = 500;
 
 
@@ -70,9 +72,9 @@ const contactSchema = z.object({
       <div className="inline-block w-full">
         <Link href="/" className='flex justify-center'>
           <div className="ml-0 flex gap-2 items-end">
-            <img src="jamspots_icon.png" alt="Jamspots icon" className="h-16" />
+            <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
            <p className="hidden [@media(min-width:385px)]:block text-xs py-3 text-gray-600 font-semibold">
-              Find the next spot where music happens.
+              {BRAND.tagline}
             </p>
           </div>
         </Link>

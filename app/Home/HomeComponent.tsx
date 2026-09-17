@@ -8,12 +8,14 @@ import GooglePlacesSearch from './GooglePlacesSearch';
 import GooglePlacesSearchServer from './GooglePlacesSearchServer';
 import JamCarousel from './jamsCarousel';
 import { Input } from '@/components/ui/input';
-import { Menu } from 'lucide-react';
+import { Menu, Compass, Building2, PlusCircle, CircleHelp } from 'lucide-react';
 import Link from 'next/link';
 import SignInIcons from './SingInIcons';
 import Filtro from './Filtro';
 
 import { JamCard, UserLocation } from '@/types/jam';
+import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 import CitiesSection from './CitiesSection';
 
@@ -31,59 +33,47 @@ export default function HomeComponent({
   const [jams, setJams] = useState(cards);
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<'local' | 'global'>('local');
-
-
-
   return (
     <div className="flex flex-col min-h-screen ">
       <MapProvider initialUserLocation={userLocation} resCards={cards}>
-        <div className="relative flex flex-col  w-[1300px] max-w-[90%] mx-auto p-0 ">
-         
+        {/* Phone: full-bleed map shell. From md: the original centered page. */}
+        <div className="relative flex flex-col w-full px-2 pt-16 md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0 mt-4">
+          {/* ── Header: one bar ──────────────────────────────────────────
+              Logo, search, filter and avatar on a single row. The search
+              input and <Filtro> are single instances repositioned by CSS,
+              never duplicated: a second <Filtro> would re-run its
+              locationSearch effect and fire the jams fetch twice on every
+              search, racing setJams against itself.
+              On phone the controls become a fixed top bar and the logo and
+              avatar drop out — the avatar lives in the bottom tab bar. */}
+          <div className="md:flex md:flex-wrap md:items-center md:gap-3 md:px-4 md:py-3 md:mb-4">
+            <div className="hidden md:flex md:items-center md:order-1">
+              <BrandLogo className="max-h-10 max-w-50 w-auto h-auto object-contain" />
+            </div>
 
-          <div className="flex justify-between items-center">
             <div
-              className="flex flex-col  justify-start  items-start pt-3 pb-4 pl-6 md:flex-row  md:gap-2  md:items-end  md:h-24 px-4 md:py-2 rounded-b-3xl
-             "
+              className="fixed top-0 inset-x-0 z-[900] flex items-center gap-2 px-2 py-2
+                         bg-tone-5/95 backdrop-blur border-b border-tone-3/40
+                         md:static md:z-auto md:bg-transparent md:backdrop-blur-none
+                         md:border-0 md:px-0 md:py-0 md:order-2 md:w-auto"
             >
-              <img
-                src="jamspots_icon.png"
-                alt="Jamspots icon"
-                className="h-16"
-              />
-              <p className=" hidden sm:block text-xs  md:py-4 text-text-2 font-semibold">
-                Find the next spot where music happens.
-              </p>
-            </div>
-
-            <div className='pb-2 sm:pb-0'>
-             <SignInIcons />
-             </div>
-
-            {/* <div className="h-[1.5px] bg-foreground-1/50 w-96 mt-1 opacity-0"></div> */}
-          </div>
-
-          <div className="flex flex-wrap items-center mb-5 sm:mt-4 ml-3 gap-2 max-w-full">
-            {/* <Input
-              className="w-72 h-10 px-3 text-sm text-gray-500 placeholder-gray-500 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              type="search"
-              placeholder="Search jams, bars, venues…"
-            /> */}
-
-            <div className="w-52 ">
-              {/* <GooglePlacesSearch /> */}
-              <GooglePlacesSearchServer/>
-            </div>
-
-            <div className=" ">
+              <div className="flex-1 min-w-0 md:w-52 md:flex-none">
+                <GooglePlacesSearchServer />
+              </div>
               <Filtro
                 setJams={setJams}
                 setLoading={setLoading}
                 setSearchType={setSearchType}
               />
             </div>
+
+            <div className="hidden md:block md:order-3 md:ml-auto">
+              <SignInIcons />
+            </div>
           </div>
 
-          <div className="flex justify-between items-end px-3 font-semibold uppercase tracking-wide text-xs md:text-lg">
+          {/* Result counts — desktop only; on phone the map gets the space. */}
+          <div className="hidden md:flex justify-between items-end px-3 font-semibold uppercase tracking-wide text-xs md:text-lg">
             {searchType === 'local' ? (
               <span>{jams.length} jams found</span>
             ) : (
@@ -99,7 +89,8 @@ export default function HomeComponent({
             </div>
           </div>
 
-          <div className="relative w-full mx-auto mt-2 h-[85vh]  sm:h-148 rounded-sm  shadow-md overflow-hidden">
+          {/* Phone: viewport minus the top bar (4rem) and tab bar (4rem). */}
+          <div className="relative w-full mx-auto h-[calc(100dvh-8rem)] rounded-lg md:mt-2 md:h-148 md:rounded-sm shadow-md overflow-hidden">
             <MapRender />
             <JamCarousel
               jams={jams}
@@ -110,7 +101,7 @@ export default function HomeComponent({
         </div>
       </MapProvider>
 
-      <div className="w-full mt-12 pt-4 pb-4">
+      <div className="hidden md:block w-full mt-12 pt-4 pb-4">
         <div className="max-w-[90%] w-[1300px] mx-auto p-6 grid grid-cols-2 gap-12">
           <div className="flex flex-col gap-2 border-t-2 border-primary-1 pt-8">
             <h3 className="text-lg font-semibold">WHAT IS A JAM SESSION?</h3>
@@ -154,12 +145,11 @@ export default function HomeComponent({
         </div>
       </div>
 
+      <div className="hidden md:block">
+        <CitiesSection />
+      </div>
 
-
-     <CitiesSection/>
-
-     
-      <footer className="w-full pb-12 mt-0 flex-1">
+      <footer className="hidden md:block w-full pb-12 mt-0 flex-1">
         <div className="flex flex-col items-center justify-center max-w-[90%] w-[1300px] mx-auto p-6 pt-12 h-full border-t-2 border-primary-1">
           {/* Contenedor Principal (Links + Branding) */}
           <div className="flex items-center justify-center gap-12 w-full mb-8">
@@ -181,13 +171,9 @@ export default function HomeComponent({
 
             {/* Branding / Tagline */}
             <div className="flex flex-col sm:flex-row items-end justify-center gap-2">
-              <img
-                src="/jamspots_icon.png"
-                alt="Jamspots icon"
-                className="h-16"
-              />
+              <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
               <p className="text-sm text-center font-medium sm:text-left pb-3">
-                Find the next spot where music happens.
+                {BRAND.tagline}
               </p>
             </div>
           </div>
@@ -196,7 +182,8 @@ export default function HomeComponent({
           <div className="w-full flex flex-col items-center border-t border-tone-1/10 pt-6 text-xs text-tone-1/60 gap-2">
             <p>
               © {new Date().getFullYear()}{' '}
-              <span className="font-bold">Jamspots</span>. All rights reserved.
+              <span className="font-bold">{BRAND.name}</span>. All rights
+              reserved.
             </p>
             <div className="flex gap-4">
               <Link
@@ -209,6 +196,32 @@ export default function HomeComponent({
           </div>
         </div>
       </footer>
+
+      {/* Phone-only tab bar. Desktop keeps the header nav + footer links. */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-[900] h-16 flex items-stretch
+                   bg-tone-5/95 backdrop-blur border-t border-tone-3/40"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        {[
+          { href: '/', label: 'Explore', Icon: Compass, active: true },
+          { href: '/cities', label: 'Cities', Icon: Building2, active: false },
+          { href: '/host', label: 'Add spot', Icon: PlusCircle, active: false },
+          { href: '/help', label: 'Help', Icon: CircleHelp, active: false },
+        ].map(({ href, label, Icon, active }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+              active ? 'text-tone-0' : 'text-tone-1/60 hover:text-tone-0'
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+            {label}
+          </Link>
+        ))}
+      </nav>
+
     </div>
   );
 }

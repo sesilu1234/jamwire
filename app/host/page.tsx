@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import JamSessionList from './jamSessionList';
+import { BRAND } from '@/lib/brand';
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -19,7 +20,7 @@ export default async function Home() {
       <div className="w-[1300px] max-w-[90%] mx-auto pt-12 pb-128">
         <div className="flex justify-between  p">
           <div className="flex flex-col relative ml-3 flex  items-center gap-2">
-            <h3 className="font-bold text-5xl">jamspots</h3>
+            <h3 className="font-bold text-5xl">{BRAND.nameLower}</h3>
             <p className="text-xs pt- text-gray-800 font-semibold"></p>
           </div>
 
