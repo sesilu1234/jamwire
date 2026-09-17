@@ -134,8 +134,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 			<DropdownMenu modal={false}>
 				<DropdownMenuTrigger asChild>
 					<button>
-						<div
-  className="shadow-md hover:shadow-lg active:shadow-lg hover:bg-tone-4 active:bg-tone-4 transition-transform transition-colors duration-200 cursor-pointer px-2 py-1 rounded-sm border-2 border-tone-1 select-none active:scale-95"
+						<span
+  className="block shadow-md hover:shadow-lg active:shadow-lg hover:bg-tone-4 active:bg-tone-4 transition-transform transition-colors duration-200 cursor-pointer px-2 py-1 rounded-sm border-2 border-tone-1 select-none active:scale-95"
 >
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -151,7 +151,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 									d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
 								/>
 							</svg>
-						</div>
+						</span>
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
