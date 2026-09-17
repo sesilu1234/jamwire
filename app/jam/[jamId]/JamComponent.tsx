@@ -23,6 +23,7 @@ import CommentSection from './CommentSection';
 import { Space_Grotesk } from 'next/font/google';
 import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
+import SiteFooter from '@/components/SiteFooter';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -66,32 +67,26 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
       className={`${spaceGrotesk.className} min-h-screen bg-tone-5 text-tone-0`}
     >
       <div className=" ">
-        <div className="flex justify-between w-[1300px] max-w-[90%] mx-auto p-0">
-          <Link href="/" className="mx-auto lg:ml-3 flex gap-2 items-end">
-           <div
-  className="ml-0 flex justify-end gap-2 items-end lg:w-118 lg:h-24 p-4 pb-2 pt-2 rounded-b-3xl
-   shadow-[5px_0_6px_-1px_var(--tone-3),_-5px_0_6px_-1px_var(--tone-3),0_6px_6px_-1px_var(--tone-3)]"
->
-  <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
+        <header className="w-full border-b border-tone-0/10">
+          <div className="mx-auto flex w-full max-w-[1300px] items-center justify-between gap-4 px-6 py-4">
+            <Link href="/" aria-label={BRAND.name} className="shrink-0">
+              <BrandLogo className="h-8 w-auto object-contain sm:h-10" />
+            </Link>
 
-  <p className="hidden lg:block text-xs py-4 text-text-2 font-semibold">
-    {BRAND.tagline}
-  </p>
-</div>
-          </Link>
+            {/* A jam page is often the first thing a visitor lands on from a
+                shared link, so give them one obvious way into the map. */}
+            <Link
+              href="/"
+              className="flex shrink-0 items-center gap-2 rounded-full border border-tone-0/15 px-4 py-2 text-sm font-medium text-tone-1/90 transition-colors hover:border-tone-0/35 hover:text-tone-0"
+            >
+              <span aria-hidden>&larr;</span>
+              <span className="sm:hidden">Map</span>
+              <span className="hidden sm:inline">Explore the map</span>
+            </Link>
+          </div>
+        </header>
 
-          {/* <div className="w-16 h-16 ">
-            <Avatar className="">
-              <AvatarImage
-                src="https://github.com/shadcn.png"
-                className="rounded-full"
-              />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </div> */}
-        </div>
-
-        <div className="max-w-6xl w-[80%] mx-auto flex flex-col-reverse lg:flex-row lg:items-center gap-10 lg:gap-20 mt-16 mb-8">
+        <div className="max-w-6xl w-[80%] mx-auto flex flex-col-reverse lg:flex-row lg:items-center gap-10 lg:gap-20 mt-10 lg:mt-14 mb-8">
           <div className="lg:w-1/2 space-y-4 lg:text-right">
             {/* The "Glowing" Accent Text */}
             <span
@@ -177,35 +172,13 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
         </div>
 
         {/* <JamComments/> */}
-        <CommentSection jamId={jam.id} comments={jam.comments} host_name={jam.host_name}/>
+        <CommentSection
+          jamId={jam.id}
+          comments={jam.comments}
+          host_name={jam.host_name}
+        />
 
-        <footer className="w-full bg-bg/0 pb-12 mt-0 flex-1 ">
-          <div className="flex items-center justify-center gap-12 max-w-[90%] w-[1300px] mx-auto p-6 pt-12 h-full border-t-2 border-primary-1">
-            {/* Navigation Links */}
-            <div className="flex flex-col text-tone-1/95 items-between justify-between gap-8 ">
-              <Link
-                href="/contact"
-                className="hover:text-tone-0  cursor-pointer"
-              >
-                CONTACT
-              </Link>
-              <Link href="/help" className="hover:text-tone-0  cursor-pointer">
-                HELP
-              </Link>
-              <Link href="/about" className="hover:text-tone-0  cursor-pointer">
-                ABOUT
-              </Link>
-            </div>
-
-            {/* Branding / Tagline */}
-            <div className="flex flex-col sm:flex-row items-end justify-center gap-2 ">
-              <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
-              <p className="text-sm  text-center font-medium sm:text-left pb-3">
-                {BRAND.tagline}
-              </p>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </div>
   );
