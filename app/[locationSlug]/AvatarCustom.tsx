@@ -164,7 +164,7 @@ useEffect(() => {
           <DropdownMenuLabel>Your account</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/host">Access</Link>
+              <Link href="/host">My jams</Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem onSelect={() => signOut({ callbackUrl: '/' })}>

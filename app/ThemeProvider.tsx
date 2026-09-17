@@ -18,7 +18,7 @@ const STORAGE_KEY = "theme";
 
 export function ThemeProvider({
 	children,
-	defaultTheme = "dark",
+	defaultTheme = "ocean",
 }: {
 	children: React.ReactNode;
 	defaultTheme?: Theme;

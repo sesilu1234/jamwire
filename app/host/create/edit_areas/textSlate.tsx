@@ -103,66 +103,82 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 		handleChange(newEditorState);
 	};
 
+	const used = editorState.getCurrentContent().getPlainText("").length;
+	const remaining = MAX_CHARS - used;
+
 	return (
-		<div className="flex flex-col gap-2 ">
-			<div className="">
-				{" "}
-				<span className="font-semibold">Characters remaining: </span>{" "}
-				{editorState.getCurrentContent().getPlainText("").length} / 1400
-			</div>
-			<div className="mb-0 flex flex-wrap gap-2 mt-2 ml-4">
+		<div className="flex flex-col gap-3">
+			{/* Toolbar */}
+			<div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50/70 p-1.5">
 				<button
+					type="button"
 					onMouseDown={(e) => {
 						e.preventDefault();
 						setBoldSelected((prev) => !prev);
 						toggleInlineStyle("BOLD");
 					}}
-					className={`px-2 py-1 ${
-						boldSelected ? "bg-blue-600" : "bg-black/80"
-					} text-white rounded `}
+					className={`h-8 w-9 rounded-lg text-[14px] font-bold transition-colors cursor-pointer ${
+						boldSelected
+							? "bg-zinc-900 text-white"
+							: "text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm"
+					}`}
 				>
-					Bold
+					B
 				</button>
 				<button
+					type="button"
 					onMouseDown={(e) => {
 						e.preventDefault();
 						setItalicSelected((prev) => !prev);
 						toggleInlineStyle("ITALIC");
 					}}
-					className={`px-2 py-1 ${
-						italicSelected ? "bg-green-600" : "bg-black/80"
-					} text-white rounded`}
+					className={`h-8 w-9 rounded-lg font-serif text-[15px] italic transition-colors cursor-pointer ${
+						italicSelected
+							? "bg-zinc-900 text-white"
+							: "text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm"
+					}`}
 				>
-					Italic
+					I
 				</button>
+
+				<span className="mx-1 h-5 w-px bg-zinc-200" />
 
 				{/* Emoji panel */}
 				{EMOJIS.map((emoji) => (
 					<button
 						key={emoji}
+						type="button"
 						onMouseDown={(e) => {
 							e.preventDefault();
 							insertEmoji(emoji);
 						}}
-						className="px-2 py-1 bg-gray-200 rounded hover:bg-yellow-300"
+						className="h-8 w-8 rounded-lg text-[15px] leading-none transition-colors hover:bg-white hover:shadow-sm cursor-pointer"
 					>
 						{emoji}
 					</button>
 				))}
 			</div>
-			<div className="w-full lg:w-3xl h-124  mt-4 rounded-lg  border-4 border-black/50 p-8 bg-gray-600/15">
-				{/* Toolbar */}
 
-				{/* Editor */}
-				<div className=" h-full p-4 rounded overflow-auto text-lg">
-					<Editor
-						editorState={editorState}
-						onChange={handleChange}
-						handleKeyCommand={handleKeyCommand}
-						placeholder="Start typing..."
-					/>
-				</div>
+			{/* Editor */}
+			<div className="min-h-[320px] w-full rounded-xl border border-zinc-200 bg-white p-5 text-[15px] leading-relaxed text-zinc-800 transition-colors focus-within:border-emerald-500/50 focus-within:ring-4 focus-within:ring-emerald-500/10 sm:min-h-[400px] sm:p-7">
+				<Editor
+					editorState={editorState}
+					onChange={handleChange}
+					handleKeyCommand={handleKeyCommand}
+					placeholder="Start typing…"
+				/>
 			</div>
+
+			<div className="flex justify-end">
+				<span
+					className={`text-[12px] font-medium tabular-nums ${
+						remaining < 100 ? "text-amber-600" : "text-zinc-400"
+					}`}
+				>
+					{remaining} characters remaining
+				</span>
+			</div>
+
 			<Toaster />
 		</div>
 	);

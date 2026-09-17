@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Primary from '@/app/createJam/primary';
+import PrimaryFields from './PrimaryFields';
 import { GeneralInfoProps } from './types/types';
 import {
   Select,
@@ -23,6 +23,8 @@ import { useAtom } from 'jotai';
 import { formAtom } from '../store/jotai';
 
 import { useFormStore } from '../store/formStore'; // path a tu store
+
+import { Card, CardTitle, FieldLabel } from './ui';
 
 export default function EditArea({
   data,
@@ -95,30 +97,36 @@ export default function EditArea({
   }, []);
 
   return (
-    <div className="lg:p-15">
-      <div className="mx-auto lg:w-3/4">
-        <Primary
+    <div className="flex flex-col gap-5">
+      {/* ---------------- the basics ---------------- */}
+      <Card>
+        <CardTitle
+          title="The basics"
+          hint="How the jam shows up in listings and where people will find it."
+        />
+        <PrimaryFields
           jamTitleRef={jamTitleRef}
           locationTitleRef={locationTitleRef}
           locationAddressRef={locationAddressRef}
           coordinatesRef={coordinatesRef}
         />
-      </div>
+      </Card>
 
-      <div className="mx-auto lg:w-3/4 p-4 ">
-        <h3 className="font-bold text-2xl mb-4">
-          Schedule
-          <span className="block pt-0 font-medium text-xs text-stone-600/60 leading-tight">
-            weekly sessions or choose dates on the calendar
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-8 items-end max-w-screen">
-          <div className="flex flex-col sm:flex-row gap-4">
+      {/* ---------------- schedule ---------------- */}
+      <Card>
+        <CardTitle
+          title="Schedule"
+          hint="Repeat it weekly, or pick the exact dates on the calendar."
+        />
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col gap-2">
+            <FieldLabel>Repeats</FieldLabel>
             <Select
               defaultValue={period}
               onValueChange={(value) => setPeriod(value as 'manual' | 'weekly')}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-[14px]">
                 <SelectValue placeholder="Select a period" />
               </SelectTrigger>
               <SelectContent>
@@ -131,8 +139,15 @@ export default function EditArea({
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div>
 
-            {/* Second select */}
+          {/* Second select */}
+          <div className="flex flex-col gap-2">
+            <FieldLabel
+              className={period === 'weekly' ? '' : 'text-zinc-300'}
+            >
+              Day of the week
+            </FieldLabel>
             {period === 'weekly' ? (
               <Select
                 defaultValue={
@@ -144,7 +159,7 @@ export default function EditArea({
                 }
                 onValueChange={setWeekDay}
               >
-                <SelectTrigger className="w-[120px] lg:w-[180px]">
+                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-[14px]">
                   <SelectValue placeholder="Select day of week" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,61 +175,79 @@ export default function EditArea({
               </Select>
             ) : (
               <Select disabled>
-                <SelectTrigger className="w-[120px] lg:w-[180px]">
+                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-100/70 py-5 text-[14px]">
                   <SelectValue placeholder="N/A" />
                 </SelectTrigger>
               </Select>
             )}
           </div>
-          <div className="flex gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="time-from" className="px-1">
-                Starting Time
-              </Label>
-              <div className="flex justify-center">
-                <Input
-                  type="time"
-                  id="time-from"
-                  step="60"
-                  value={fromTime}
-                  onChange={(e) => setFromTime(e.target.value)}
-                  className="bg-background appearance-none text-center "
-                />
-              </div>
+
+          <div className="flex flex-col gap-2">
+            <FieldLabel htmlFor="time-from">Starting time</FieldLabel>
+            <Input
+              type="time"
+              id="time-from"
+              step="60"
+              value={fromTime}
+              onChange={(e) => setFromTime(e.target.value)}
+              className="w-full appearance-none rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-center text-[14px] tabular-nums"
+            />
+          </div>
+        </div>
+
+        {/* ---------------- calendar ---------------- */}
+        <div className="mt-7 border-t border-zinc-100 pt-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[13px] leading-snug text-zinc-500">
+              Pick the dates below — each one keeps the starting time above.
+            </p>
+            <button
+              type="button"
+              className="
+                self-start rounded-lg border border-zinc-200 bg-white px-3 py-1.5
+                text-[12px] font-semibold tracking-tight text-zinc-600
+                transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900
+                cursor-pointer sm:self-auto
+              "
+              onClick={() => setDates([])}
+            >
+              Clear dates
+            </button>
+          </div>
+
+          <Calendar03
+            period={period}
+            weekDay={weekDay}
+            dates={dates}
+            datesSetter={setDates}
+          />
+
+          <div className="mt-5">
+            <FieldLabel>Selected dates</FieldLabel>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {dates.length === 0 ? (
+                <span className="text-[13px] text-zinc-400">
+                  No dates selected yet.
+                </span>
+              ) : null}
+              {dates.slice(0, 3).map((date, i) => (
+                <span
+                  key={i}
+                  className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-medium tabular-nums text-emerald-800 ring-1 ring-inset ring-emerald-600/15"
+                >
+                  {date.toLocaleDateString()} · {fromTime}{' '}
+                  {/* use state directly */}
+                </span>
+              ))}
+              {dates.length > 3 && (
+                <span className="text-[12px] font-medium text-zinc-500">
+                  +{dates.length - 3} more
+                </span>
+              )}
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4 md:gap-0 sm:flex-row justify-between py-6 mt-6">
-          <h1 className="">
-            Or select manually (dates keep the time inputed):
-          </h1>
-          <button
-            className="p-2 bg-amber-300 rounded-lg self-end"
-            onClick={() => setDates([])}
-          >
-            Clear dates
-          </button>
-        </div>
-
-        <Calendar03
-          period={period}
-          weekDay={weekDay}
-          dates={dates}
-          datesSetter={setDates}
-        />
-        <div className="mt-4">
-          <h2>Selected dates:</h2>
-          <div className="mt-4 flex gap-2 items-center">
-            {dates.slice(0, 3).map((date, i) => (
-              <span key={i} className="px-2 py-1 bg-gray-200 rounded">
-                {date.toLocaleDateString()} {fromTime}{' '}
-                {/* use state directly */}
-              </span>
-            ))}
-            {dates.length > 3 && <span className="px-2 py-1">...</span>}
-          </div>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -281,7 +314,7 @@ export function Calendar03({
       required
       selected={dates}
       onSelect={datesSetter}
-      className="rounded-lg border shadow-sm mt-0 mx-auto"
+      className="mx-auto w-fit rounded-xl border border-zinc-200 bg-zinc-50/40 p-3 shadow-none"
     />
   );
 }

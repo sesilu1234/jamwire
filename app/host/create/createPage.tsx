@@ -23,68 +23,120 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="relative flex flex-col lg:flex-row bg-background text-primary">
-      <div className=" lg:min-h-screen  bg-[rgb(30,30,30)] ">
-        <Dialog>
-          <DialogTrigger asChild>
-            <button className="flex mx-8 lg:my-24 my-12   items-center gap-4 text-white cursor-pointer">
-              <div className="hidden lg:flex gap-2 hover:underline">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="currentColor"
+    <div className="relative flex min-h-screen flex-col bg-stone-50 text-zinc-900 lg:flex-row">
+      {/* ---------------------------------------------------------------- */}
+      {/* Side rail                                                         */}
+      {/* ---------------------------------------------------------------- */}
+      <aside
+        className="
+          relative z-20 flex flex-col shrink-0
+          bg-[#17130d] bg-gradient-to-b from-[#1c1710] to-[#0c0a08] text-zinc-100
+          lg:w-[288px] lg:h-screen lg:sticky lg:top-0
+          border-b border-amber-200/10 lg:border-b-0 lg:border-r
+        "
+      >
+        {/* soft brand glow, purely decorative */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-amber-400/15 blur-3xl"
+        />
+
+        <div className="relative flex flex-col gap-1 px-6 pt-6 lg:px-7 lg:pt-8">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="group flex w-fit items-center gap-2 text-amber-100/50 transition-colors hover:text-amber-100 cursor-pointer">
+                <span className="hidden lg:flex items-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="18px"
+                    viewBox="0 -960 960 960"
+                    width="18px"
+                    fill="currentColor"
+                    className="transition-transform group-hover:-translate-x-0.5"
+                  >
+                    <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+                  </svg>
+                  <span className="text-[13px] font-medium tracking-tight">
+                    Back to home page
+                  </span>
+                </span>
+                <span className="lg:hidden rounded-full border border-amber-200/25 px-3 py-1 text-[12px] font-medium tracking-tight transition-colors group-hover:border-amber-200/50">
+                  Exit
+                </span>
+              </button>
+            </DialogTrigger>
+
+            <DialogContent className="sm:max-w-[420px] rounded-2xl border-zinc-200 bg-white text-zinc-900">
+              <DialogHeader>
+                <DialogTitle className="text-lg tracking-tight">
+                  Leave without saving?
+                </DialogTitle>
+                <DialogDescription className="text-sm text-zinc-500">
+                  Your changes haven’t been saved. If you leave now, they’ll be
+                  lost.
+                </DialogDescription>
+              </DialogHeader>
+
+              <DialogFooter className="gap-2">
+                <DialogClose asChild>
+                  <Button
+                    variant="ghost"
+                    className="rounded-xl border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                  >
+                    Stay
+                  </Button>
+                </DialogClose>
+
+                <Button
+                  variant="destructive"
+                  className="rounded-xl"
+                  onClick={() => {
+                    router.push('/host');
+                  }}
                 >
-                  <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
-                </svg>
-                <h1 className="text-sm hover:underline ">Back to home page</h1>
-              </div>
-              <div className="lg:hidden border-1 border-white p-1 rounded-sm">
-                <h1 className="text-sm hover:underline ">Exit</h1>
-              </div>
-            </button>
-          </DialogTrigger>
-
-          <DialogContent className="sm:max-w-[420px] bg-white text-primary">
-            <DialogHeader>
-              <DialogTitle className="">Leave without saving?</DialogTitle>
-              <DialogDescription className="text-sm">
-                Your changes haven’t been saved. If you leave now, they’ll be
-                lost.
-              </DialogDescription>
-            </DialogHeader>
-
-            <DialogFooter className="gap-2">
-              <DialogClose asChild>
-                <Button variant="ghost" className="border-1 border-black/60">
-                  Stay
+                  Leave anyway
                 </Button>
-              </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  router.push('/host');
-                }}
-              >
-                Leave anyway
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <div className="lg:hidden">
-          <EditSections_phone childSaveOnUnmount={childSaveOnUnmount} />
+          {/* Wordmark + context */}
+          <div className="mt-5 hidden lg:block">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400">
+              jamspots
+            </p>
+            <h1 className="mt-1.5 text-[26px] font-bold leading-tight tracking-tight text-white">
+              New jam
+            </h1>
+            <p className="mt-1.5 text-[13px] leading-snug text-amber-100/40">
+              Fill in the sections, then save when you’re ready.
+            </p>
+          </div>
         </div>
-        <div className="hidden lg:block">
-          <EditSections_desktop childSaveOnUnmount={childSaveOnUnmount} />
-        </div>
-      </div>
 
-      <div className="min-h-screen  bg-white">
+        <div className="relative mt-4 lg:mt-7 lg:flex-1 lg:overflow-y-auto">
+          <div className="lg:hidden">
+            <EditSections_phone childSaveOnUnmount={childSaveOnUnmount} />
+          </div>
+          <div className="hidden lg:block">
+            <EditSections_desktop childSaveOnUnmount={childSaveOnUnmount} />
+          </div>
+        </div>
+
+        <div className="relative hidden lg:block px-7 pb-6 pt-4">
+          <p className="text-[11px] leading-relaxed text-amber-100/30">
+            Nothing is published until you hit{' '}
+            <span className="text-amber-200/60">Save and exit</span>.
+          </p>
+        </div>
+      </aside>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Workspace                                                         */}
+      {/* ---------------------------------------------------------------- */}
+      <main className="min-w-0 flex-1 bg-stone-50">
         <EditArea childSaveOnUnmount={childSaveOnUnmount} />
-      </div>
+      </main>
     </div>
   );
 }

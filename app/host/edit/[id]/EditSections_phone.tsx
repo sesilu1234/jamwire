@@ -1,103 +1,113 @@
-"use client";
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+'use client';
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import InfoIcon from "./icons/InfoIcon";
-import PhotosIcon from "./icons/PhotosIcon";
-import FeaturesIcon from "./icons/FeaturesIcon";
-import DescriptionIcon from "./icons/DescriptionIcon";
-import SocialIcon from "./icons/SocialIcon";
+import InfoIcon from './icons/InfoIcon';
+import PhotosIcon from './icons/PhotosIcon';
+import FeaturesIcon from './icons/FeaturesIcon';
+import DescriptionIcon from './icons/DescriptionIcon';
+import SocialIcon from './icons/SocialIcon';
 
-import { useParams } from "next/navigation";
+import { useParams } from 'next/navigation';
 
 const sections = [
-	{ id: "informaciongeneral", label: "General information", Icon: InfoIcon },
-	{ id: "fotos", label: "Photos", Icon: PhotosIcon },
-	{
-		id: "caracteristicas",
-		label: "Site features",
-		Icon: FeaturesIcon,
-	},
-	{ id: "descripcion", label: "Description", Icon: DescriptionIcon },
-	{ id: "redessociales", label: "Social media", Icon: SocialIcon },
+  { id: 'informaciongeneral', label: 'General information', Icon: InfoIcon },
+  { id: 'fotos', label: 'Photos', Icon: PhotosIcon },
+  {
+    id: 'caracteristicas',
+    label: 'Site features',
+    Icon: FeaturesIcon,
+  },
+  { id: 'descripcion', label: 'Description', Icon: DescriptionIcon },
+  { id: 'redessociales', label: 'Social media', Icon: SocialIcon },
 ];
 
 type EditAreaProps = {
-	childSaveOnUnmount: React.RefObject<() => void>;
+  childSaveOnUnmount: React.RefObject<() => void>;
 };
 
 export default function EditSections_phone({
-	childSaveOnUnmount,
+  childSaveOnUnmount,
 }: EditAreaProps) {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const initialSection = searchParams.get("section") || "informaciongeneral";
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialSection = searchParams.get('section') || 'informaciongeneral';
 
-	const { id: slugId } = useParams();
+  const { id: slugId } = useParams();
 
-	const [collapsed, setCollapsed] = useState(false);
+  // local state for instant highlight
+  const [currentSection, setCurrentSection] = useState(initialSection);
 
-	// local state for instant highlight
-	const [currentSection, setCurrentSection] = useState(initialSection);
+  const goToSection = (id: string) => {
+    setCurrentSection(id); // instant highlight
+    router.push(`/host/edit/${slugId}?section=${id}`); // update URL
+  };
 
-	const goToSection = (id: string) => {
-		setCurrentSection(id); // instant highlight
-		router.push(`/host/edit/${slugId}?section=${id}`); // update URL
-	};
+  const activeIndex = sections.findIndex((s) => s.id === currentSection);
 
-	return (
-		<div className="">
-			{" "}
-			<div
-				className={`flex flex-col gap-8 mx-8 w-3/5 overflow-hidden
-    transition-[opacity,max-height,padding] duration-300 ease-in-out
-    ${
-			collapsed ? "opacity-0 max-h-0 pb-0" : "opacity-100 max-h-[800px] pb-12"
-		}`}
-			>
-				{sections.map(({ id, label, Icon }) => (
-					<div
-						key={id}
-						onClick={() => {
-							// call the current section save function
-							goToSection(id);
-							childSaveOnUnmount.current?.(); // then switch section
-						}}
-						className={`
-            flex items-center p-2 gap-2 rounded-md cursor-pointer w-44
-           ${
-							currentSection === id
-								? "bg-gray-800/80  text-white"
-								: "bg-white hover:bg-gray-100"
-						}
-           
-          `}
-					>
-						<Icon
-							width={32}
-							height={32}
-							key={id}
-							fill={`
-           ${currentSection === id ? "#FFFFFF" : "#000000"}
-           
-          `}
-						/>
+  return (
+    <div className="pb-4">
+      <div className="flex items-baseline justify-between px-6 pb-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-400">
+            jamspots
+          </p>
+          <h1 className="mt-0.5 text-xl font-bold leading-none tracking-tight text-white">
+            Edit jam
+          </h1>
+        </div>
+        <span className="text-[11px] font-medium tabular-nums text-amber-100/40">
+          Step {activeIndex < 0 ? 1 : activeIndex + 1} of {sections.length}
+        </span>
+      </div>
 
-						<span>{label}</span>
-					</div>
-				))}
-			</div>
-			<div
-				onClick={() => setCollapsed((v) => !v)}
-				className="
-      absolute left-1/2 top-12 -translate-x-1/2
-      bg-white/10 p-2 border border-amber-200
-      text-white rounded-md cursor-pointer
-      transition-transform duration-200 active:scale-95
-    "
-			>
-				{sections.find((s) => s.id === currentSection)?.label}
-			</div>
-		</div>
-	);
+      {/* horizontal chip nav */}
+      <div
+        className="
+          flex gap-2 overflow-x-auto px-6 pb-1
+          [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+        "
+      >
+        {sections.map(({ id, label, Icon }) => {
+          const isActive = currentSection === id;
+
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => {
+                // call the current section save function
+                goToSection(id);
+                childSaveOnUnmount.current?.(); // then switch section
+              }}
+              className={`
+                flex shrink-0 items-center gap-2 rounded-full border py-2 pl-2 pr-4
+                text-[13px] font-medium tracking-tight whitespace-nowrap
+                transition-colors duration-200 active:scale-[0.98] cursor-pointer
+                ${
+                  isActive
+                    ? 'border-amber-400/45 bg-amber-400/15 text-white'
+                    : 'border-amber-100/10 bg-amber-100/[0.04] text-amber-100/45'
+                }
+              `}
+            >
+              <span
+                className={`
+                  flex h-6 w-6 items-center justify-center rounded-full
+                  ${isActive ? 'bg-amber-400/25' : 'bg-amber-100/[0.07]'}
+                `}
+              >
+                <Icon
+                  width={14}
+                  height={14}
+                  fill={isActive ? '#fbbf24' : '#a8a29e'}
+                />
+              </span>
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }

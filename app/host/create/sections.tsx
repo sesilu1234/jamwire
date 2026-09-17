@@ -26,7 +26,10 @@ export default function Sections({ childSaveOnUnmount }: EditAreaProps) {
   const form = useFormStore((state) => state.form);
 
   return (
-    <div>
+    <div
+      key={currentSection}
+      className="animate-in fade-in slide-in-from-bottom-1 duration-300"
+    >
       {currentSection === 'informaciongeneral' && (
         <GeneralInfo
           data={form.generalInfo}

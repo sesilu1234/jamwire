@@ -83,29 +83,40 @@ export default function CommentSection({
 
     const contentToSave = message;
 
-    const newMessage = {
-      comment_id: Date.now().toString(), // now it’s a string
-      display_name: session?.user?.display_name || 'You',
-      time: 'now',
-      content: contentToSave,
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan',
-      deleted_at: null,
-      is_querying_user: true,
-      host: session?.user?.display_name === host_name,
-      replies: [],
-    };
-
-    setCommentsState((prev) => [newMessage, ...prev]);
-    setMessage('');
-
+    // No optimism: wait for the DB to confirm and return the real row.
+    setIsPosting(true);
     try {
-      // 5. Send to Server Action
-      await createComment(jamId, contentToSave);
+      const res = await createComment(jamId, contentToSave);
+
+      if (res?.error || !res?.comment?.comment_id) {
+        console.error('Post failed:', res?.error);
+        toast('Could not post comment', {
+          description: 'Please try again in a moment.',
+        });
+        return;
+      }
+
+      const newMessage: Comment = {
+        comment_id: res.comment.comment_id, // real UUID from the database
+        display_name: session?.user?.display_name || 'You',
+        time: 'now',
+        content: contentToSave,
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan',
+        deleted_at: null,
+        is_querying_user: true,
+        host: session?.user?.display_name === host_name,
+        replies: [],
+      };
+
+      setCommentsState((prev) => [newMessage, ...prev]);
+      setMessage('');
     } catch (error) {
-      // 6. Handle Error (Optional: Roll back the UI state if it fails)
-      console.error('Reply failed:', error);
-      alert('Could not save reply.');
-      setMessage(contentToSave);
+      console.error('Post failed:', error);
+      toast('Could not post comment', {
+        description: 'Please try again in a moment.',
+      });
+    } finally {
+      setIsPosting(false);
     }
   };
 
@@ -128,41 +139,55 @@ export default function CommentSection({
 
     if (!messageReply.trim()) return;
 
-    // 2. Capture the message before clearing the input
+    // Capture the message before clearing the input
     const contentToSave = messageReply;
 
-    // 3. Update UI Optimistically
-    const tempReply = {
-      comment_id: Date.now().toString(), // now it’s a string
-      display_name: session?.user?.display_name || 'You',
-      time: 'Just now',
-      content: contentToSave,
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan',
-      deleted_at: null,
-      host: session?.user?.display_name === host_name,
-      is_querying_user: true,
-    };
-
-    setCommentsState((prev) =>
-      prev.map((comment) =>
-        comment.comment_id === parentId
-          ? { ...comment, replies: [...(comment.replies || []), tempReply] }
-          : comment,
-      ),
-    );
-
-    // 4. Clear input immediately for better UX
-    setMessageReply('');
-    setReplyingTo(null);
-
+    // No optimism: wait for the DB to confirm and return the real row.
+    setPostingReplyId(parentId);
     try {
-      // 5. Send to Server Action
-      await createComment(jamId, contentToSave, parentId);
+      const res = await createComment(jamId, contentToSave, parentId);
+
+      if (res?.error || !res?.comment?.comment_id) {
+        console.error('Reply failed:', res?.error);
+        toast('Could not post reply', {
+          description: 'Please try again in a moment.',
+        });
+        return;
+      }
+
+      const newReply: Reply = {
+        comment_id: res.comment.comment_id, // real UUID from the database
+        display_name: session?.user?.display_name || 'You',
+        time: 'Just now',
+        content: contentToSave,
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan',
+        deleted_at: null,
+        host: session?.user?.display_name === host_name,
+        is_querying_user: true,
+      };
+
+      setCommentsState((prev) =>
+        prev.map((comment) =>
+          comment.comment_id === parentId
+            ? { ...comment, replies: [...(comment.replies || []), newReply] }
+            : comment,
+        ),
+      );
+
+      // Make sure the thread is open so the new reply is visible.
+      setExpandedThreads((prev) =>
+        prev.includes(parentId) ? prev : [...prev, parentId],
+      );
+
+      setMessageReply('');
+      setReplyingTo(null);
     } catch (error) {
-      // 6. Handle Error (Optional: Roll back the UI state if it fails)
       console.error('Reply failed:', error);
-      alert('Could not save reply.');
-      setMessageReply(contentToSave);
+      toast('Could not post reply', {
+        description: 'Please try again in a moment.',
+      });
+    } finally {
+      setPostingReplyId(null);
     }
   };
 
@@ -309,6 +334,9 @@ export default function CommentSection({
   const [message, setMessage] = useState('');
   const [messageReply, setMessageReply] = useState('');
 
+  const [isPosting, setIsPosting] = useState(false);
+  const [postingReplyId, setPostingReplyId] = useState<string | null>(null);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
 
@@ -330,19 +358,29 @@ export default function CommentSection({
             <AvatarSelf display_name={session?.user?.display_name || null} />
           )}
           <div className="flex-1">
-            <textarea
-              placeholder="Ask a question or leave a comment..."
-              className="w-full bg-tone-0/5 border border-tone-0/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all resize-none placeholder:opacity-50"
-              rows={3}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
+            <div className="relative">
+              <textarea
+                placeholder="Ask a question or leave a comment..."
+                className="w-full bg-tone-0/5 border border-tone-0/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all resize-none placeholder:opacity-50 disabled:opacity-60"
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={isPosting}
+              />
+              {isPosting && (
+                <div className="absolute top-3 right-3">
+                  <Spinner />
+                </div>
+              )}
+            </div>
             <div className="flex justify-end mt-2">
               <button
-                className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
+                className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center gap-2"
                 onClick={() => postMessage()}
+                disabled={isPosting}
               >
-                Post
+                {isPosting && <Spinner size={14} />}
+                {isPosting ? 'Posting…' : 'Post'}
               </button>
             </div>
           </div>
@@ -497,19 +535,33 @@ export default function CommentSection({
                   />
                 )}
                 <div className="flex-1 flex flex-col gap-2">
-                  <input
-                    autoFocus
-                    placeholder={`Reply to ${comment.display_name}...`}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-purple-500/50 transition-all"
-                    value={messageReply}
-                    onChange={(e) => setMessageReply(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      autoFocus
+                      placeholder={`Reply to ${comment.display_name}...`}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-purple-500/50 transition-all disabled:opacity-60"
+                      value={messageReply}
+                      onChange={(e) => setMessageReply(e.target.value)}
+                      disabled={postingReplyId === comment.comment_id}
+                    />
+                    {postingReplyId === comment.comment_id && (
+                      <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                        <Spinner size={14} />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex justify-end">
                     <button
-                      className="bg-purple-600/80 hover:bg-purple-600 px-4 py-1.5 rounded-md text-[11px] font-bold transition-all"
+                      className="bg-purple-600/80 hover:bg-purple-600 px-4 py-1.5 rounded-md text-[11px] font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1.5"
                       onClick={() => postReply(comment.comment_id)}
+                      disabled={postingReplyId === comment.comment_id}
                     >
-                      Reply
+                      {postingReplyId === comment.comment_id && (
+                        <Spinner size={12} />
+                      )}
+                      {postingReplyId === comment.comment_id
+                        ? 'Posting…'
+                        : 'Reply'}
                     </button>
                   </div>
                 </div>
@@ -651,6 +703,35 @@ export default function CommentSection({
         ))}
       </div>
     </div>
+  );
+}
+
+function Spinner({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className="animate-spin text-purple-300"
+      role="status"
+      aria-label="Loading"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="3"
+        className="opacity-20"
+      />
+      <path
+        d="M12 2a10 10 0 0 1 10 10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

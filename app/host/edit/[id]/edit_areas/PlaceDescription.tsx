@@ -6,6 +6,8 @@ import { PlaceDescriptionProps } from "./types/types";
 
 import dynamic from "next/dynamic";
 
+import { Card, CardTitle } from "./ui";
+
 const DraftEditor = dynamic(() => import("./textSlate"), {
 	ssr: false,
 });
@@ -17,11 +19,13 @@ export default function PlaceDescription({
 	const [text, setText] = useState("");
 
 	return (
-		<div className="pb-12 p-6 pt-0 flex flex-col gap-3">
+		<Card>
 			<Toaster />
-			<div className="ml-4 xl:ml-48 mt-0">
-				<DraftEditor data={data} childSaveOnUnmount={childSaveOnUnmount} />
-			</div>
-		</div>
+			<CardTitle
+				title="Description"
+				hint="What happens on the night, who it's for, house rules — keep it warm and short."
+			/>
+			<DraftEditor data={data} childSaveOnUnmount={childSaveOnUnmount} />
+		</Card>
 	);
 }
