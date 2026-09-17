@@ -1,3 +1,12 @@
+# Jamwire
+
+Find the next spot where music happens — a live map of jam sessions and open
+mics. Formerly called Jamspots; the repo folder and some infrastructure names
+still carry the old name (see `lib/brand.ts`).
+
+Brand strings and the logo come from `lib/brand.ts`. To swap the logo, replace
+`public/jamwire_icon.png`.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with
 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 

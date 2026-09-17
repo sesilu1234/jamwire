@@ -32,7 +32,9 @@ export default function JamCarousel({
 
   return (
     <div
-      className={`flex flex-col max-w-[95%] absolute top-8 left-1/2 -translate-x-1/2 md:top-8 md:left-18 md:translate-x-0 z-[50] gap-1`}
+      className={`flex flex-col absolute z-[50] gap-1
+        inset-x-2 bottom-2
+        md:inset-x-auto md:bottom-auto md:max-w-[95%] md:top-8 md:left-18`}
     >
       {/* Collapse button */}
       <div
@@ -50,7 +52,11 @@ export default function JamCarousel({
         className={`
     card-container flex flex-col items-center bg-tone-3/45 rounded-b-xl border border-black/20 gap-6
     overflow-y-auto transition-all duration-700 ease-in-out
-    ${collapsed ? 'max-h-0 p-0 opacity-0' : 'max-h-108 p-6 md:pr-4 opacity-100'}
+    ${
+      collapsed
+        ? 'max-h-0 p-0 opacity-0'
+        : 'max-h-[45vh] p-4 md:max-h-108 md:p-6 md:pr-4 opacity-100'
+    }
    
   `}
       >

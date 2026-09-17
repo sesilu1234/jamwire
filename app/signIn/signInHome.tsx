@@ -2,6 +2,7 @@
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { BRAND } from '@/lib/brand';
 
 export default function SignIn() {
   const searchParams = useSearchParams();
@@ -18,9 +19,9 @@ export default function SignIn() {
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end gap-2 mb-20">
-          <h1 className="font-bold text-4xl tracking-tight">jamspots</h1>
+          <h1 className="font-bold text-4xl tracking-tight">{BRAND.nameLower}</h1>
           <p className="text-xs pb-1 text-gray-600 font-semibold uppercase tracking-wider">
-            Find the next spot where music happens.
+            {BRAND.tagline}
           </p>
         </div>
 
@@ -28,7 +29,7 @@ export default function SignIn() {
         <div className="flex flex-col items-center justify-center">
           <div className="text-center mb-8">
             <h2 className="font-extrabold text-4xl md:text-6xl tracking-tighter">
-              WELCOME TO JAMSPOTS
+              WELCOME TO {BRAND.nameUpper}
             </h2>
           </div>
 

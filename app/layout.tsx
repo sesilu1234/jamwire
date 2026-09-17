@@ -7,27 +7,28 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // P
 import Script from 'next/script';
 import CookieConsent from './cookieToaster';
 import { Toaster } from '@/components/ui/sonner';
+import { BRAND } from '@/lib/brand';
 
 // ADD THIS BLOCK
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jamspots.xyz'),
+  metadataBase: new URL(BRAND.siteUrl),
   title: {
-    default: 'Jamspots',
-    template: '%s | Jamspots',
+    default: BRAND.name,
+    template: `%s | ${BRAND.name}`,
   },
   description:
     'Discover local jam sessions and open mics. Play, watch, hang out, or just meet people.',
   openGraph: {
-    title: 'Jamspots',
+    title: BRAND.name,
     description:
       'Find jam sessions and open mics. Play, watch, or just hang out.',
-    url: 'https://jamspots.xyz',
-    siteName: 'Jamspots',
+    url: BRAND.siteUrl,
+    siteName: BRAND.name,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jamspots',
+    title: BRAND.name,
     description: 'Jam sessions, open mics, and bars where people hang out.',
   },
 };

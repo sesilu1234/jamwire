@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function Help() {
   const faqs = [
@@ -12,7 +14,7 @@ export default function Help() {
     },
     {
       q: '¿Qué debo llevar?',
-      a: 'Tu instrumento, aunque a veces los Jamspots dejan instrumentos disponibles en el lugar, y muchas ganas de tocar.',
+      a: 'Tu instrumento, aunque a veces los locales dejan instrumentos disponibles en el lugar, y muchas ganas de tocar.',
     },
     {
       q: 'Normas básicas',
@@ -33,9 +35,9 @@ export default function Help() {
       <div className="inline-block">
         <Link href="/">
           <div className="ml-3 flex gap-2 items-end">
-            <img src="jamspots_icon.png" alt="Jamspots icon" className="h-16" />
+            <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
             <p className="text-xs py-3 text-gray-600 font-semibold">
-              Find the next spot where music happens.
+              {BRAND.tagline}
             </p>
           </div>
         </Link>

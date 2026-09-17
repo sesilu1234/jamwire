@@ -12,10 +12,10 @@ jobs:
       - name: Call API and Print Result
         run: |
           echo "Calling calculate-priority..."
-          
+
           # Capture the status code and the response body separately
           RESPONSE=$(curl -s -w "%{http_code}" \
-            -X POST "https://www.jamspots.xyz/api/public/calculate-priority" \
+            -X POST "https://www.jamwire.xyz/api/public/calculate-priority" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json")
 
