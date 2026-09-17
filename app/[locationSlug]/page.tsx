@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locationS
       siteName: BRAND.name,
       images: [
         {
-          url: `${siteUrl}${BRAND.logo}`, // Puedes cambiar esto por una imagen de la ciudad si la tuvieras
+          url: `${siteUrl}${BRAND.ogImage}`, // Cambiar por una imagen de la ciudad si algún día la hay
           width: 1200,
           height: 630,
           alt: `Jam Sessions in ${capitalizedCity}`,
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locationS
       card: 'summary_large_image',
       title,
       description,
-      images: [`${siteUrl}${BRAND.logo}`],
+      images: [`${siteUrl}${BRAND.ogImage}`],
     },
   };
 }
@@ -141,7 +141,7 @@ export default async function CityPage({ params }: { params: Promise<{ locationS
             addressLocality: userLocation?.city || ''
           },
         },
-        image: jam.images?.[0] || `${BRAND.siteUrl}${BRAND.logo}`,
+        image: jam.images?.[0] || `${BRAND.siteUrl}${BRAND.ogImage}`,
         description: `Join the ${jam.jam_title} at ${jam.location_title}. Open stage for musicians.`,
       },
     })),
