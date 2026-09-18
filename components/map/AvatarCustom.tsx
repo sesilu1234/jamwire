@@ -3,7 +3,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { User } from 'lucide-react';
 
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
 
 import type { Session } from 'next-auth';
 import { signOut } from 'next-auth/react';
@@ -30,21 +29,23 @@ function AvatarCustom({ session }: AvatarCustomProps) {
     <Image
       src={img}
       alt="User avatar"
-      width={62}
-      height={62}
-      className="rounded-full object-cover border border-white/40 k"
+      width={48}
+      height={48}
+      className="h-12 w-12 rounded-full object-cover ring-1 ring-tone-0/20"
     />
   ) : (
-    <div className="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center text-white">
-      <User />
+    // Same 48px box as the image branch. These used to be 62px and 64px, so the
+    // header shifted depending on whether the account had a picture.
+    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-tone-4 text-tone-0 ring-1 ring-tone-0/20">
+      <User className="size-5" />
     </div>
   );
 }
 
 import { useState, useRef } from 'react';
 import { MoreHorizontalIcon } from 'lucide-react';
-import { z } from 'zod';
-const MAX_MESSAGE_LENGTH = 500;
+import { contactSchema } from '@/lib/contact';
+
 
 
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -77,27 +79,20 @@ export default function DropdownMenuAvatar({ session }: AvatarCustomProps) {
 
 
 
-const contactSchema = z.object({
-  email: z
-    .email('Invalid email format')
-    .max(254),
-  msg: z
-    .string()
-    .trim()
-    .min(1, 'Message is required')
-    .max(MAX_MESSAGE_LENGTH, `Message must be under ${MAX_MESSAGE_LENGTH} characters`),
-});
 
 
 
 
 
   const sendData = async (email: string, msg: string) => {
-  await fetch('/api/public/users-suggestions', {
+  // Returns the response so the caller can tell a 400/500 from a success.
+  // It used to ignore the result entirely and always report "Message sent".
+  const res = await fetch('/api/public/users-suggestions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, msg }),
   });
+  if (!res.ok) throw new Error(`send failed: ${res.status}`);
 };
 
 
@@ -134,6 +129,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     toast.success('Message sent', {
       description: 'Thank you for helping the community stay updated.',
     });
+  } catch {
+    toast.error("That didn't go through", {
+      description: 'Try again in a moment.',
+    });
   } finally {
     setIsSending(false);
   }
@@ -150,16 +149,21 @@ useEffect(() => {
     <div>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-         <button className="transition-transform transition-colors duration-150 ease-out 
-                   hover:scale-105 hover:brightness-105 
-                   active:scale-95 active:brightness-90 
-                   rounded-full">
-  <AvatarCustom session={session} />
-</button>
+          <button
+            aria-label="Your account"
+            className="rounded-full transition-transform duration-150 ease-out
+                       hover:scale-105 active:scale-95
+                       focus-visible:ring-2 focus-visible:ring-tone-0/25
+                       focus-visible:ring-offset-2 focus-visible:ring-offset-tone-5
+                       focus-visible:outline-none"
+          >
+            <AvatarCustom session={session} />
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-40 relative top-0 border-1 border-tone-0/25 z-[500]"
+          className="w-56 z-[500]"
           align="end"
+          sideOffset={8}
         >
           <DropdownMenuLabel>Your account</DropdownMenuLabel>
           <DropdownMenuGroup>
@@ -170,10 +174,8 @@ useEffect(() => {
             <DropdownMenuItem onSelect={() => signOut({ callbackUrl: '/' })}>
               Sign out
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <div className="h-[1.5px] bg-tone-0/40 w-full "></div>
-            </DropdownMenuItem>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
           <DropdownMenuLabel>Settings</DropdownMenuLabel>
           <DropdownMenuGroup>
             <div className="px-0 py-0">
@@ -240,13 +242,12 @@ useEffect(() => {
             </form>
         </DialogContent>
     </Dialog>
-     <Toaster />
     </div>
   );
 }
 
 import { Sun, Moon, Coffee, Droplet, Leaf, Rocket } from 'lucide-react';
-import { useTheme } from '../ThemeProvider';
+import { useTheme } from '@/app/ThemeProvider';
 
 export function AccordionTheme() {
   const { theme, setTheme } = useTheme(); // use context
@@ -275,12 +276,12 @@ export function AccordionTheme() {
                 key={t}
                 onClick={() => setTheme(t)}
                 className={`flex items-center gap-2 px-4 py-1 text-left rounded-md ${
-                  theme === t ? 'font-bold' : 'hover:bg-accent hover:underline'
+                  theme === t ? 'font-bold' : 'hover:bg-tone-0/8'
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 ${
-                    theme === t ? iconColors[t] : 'text-gray-400/80'
+                    theme === t ? iconColors[t] : 'text-tone-0/40'
                   }`}
                 />
                 {t.charAt(0).toUpperCase() + t.slice(1)}

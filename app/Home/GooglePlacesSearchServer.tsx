@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useMapContext } from './MapContext';
+import { useMapContext } from '@/components/map/MapContext';
 import { Search, X, MapPin } from 'lucide-react';
 
 export default function GooglePlacesSearch() {

@@ -4,14 +4,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MapProvider } from './MapContext';
 
 import dynamic from 'next/dynamic';
-import GooglePlacesSearch from './GooglePlacesSearch';
+import GooglePlacesSearch from '@/components/map/GooglePlacesSearch';
 import GooglePlacesSearchServer from './GooglePlacesSearchServer';
 import JamCarousel from './jamsCarousel';
 import { Input } from '@/components/ui/input';
 import { Menu, Compass, Building2, PlusCircle, CircleHelp } from 'lucide-react';
 import Link from 'next/link';
-import SignInIcons from './SingInIcons';
-import Filtro from './Filtro';
+import SignInIcons from '@/components/map/SingInIcons';
+import Filtro from '@/components/map/Filtro';
 
 import { JamCard, UserLocation } from '@/types/jam';
 import { BRAND } from '@/lib/brand';
@@ -25,7 +25,7 @@ interface HomeComponentProps {
   userLocation: UserLocation;
 }
 
-const MapRender = dynamic(() => import('./MapRender'), { ssr: false });
+const MapRender = dynamic(() => import('@/components/map/MapRender'), { ssr: false });
 
 export default function HomeComponent({
   cards,

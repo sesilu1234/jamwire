@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { MAX_MESSAGE_LENGTH, contactSchema } from '@/lib/contact';
 import { ArrowRight, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -15,12 +16,6 @@ import BrandLogo from '@/components/BrandLogo';
 import SiteFooter from '@/components/SiteFooter';
 import { BRAND } from '@/lib/brand';
 
-/**
- * Must stay <= the cap in app/api/public/users-suggestions/route.ts. The route
- * rejects a longer message with a 400, so a higher number here would let people
- * write past the limit and only find out after pressing Submit.
- */
-const MAX_MESSAGE_LENGTH = 150;
 
 /**
  * Field styling is written out here rather than left to the shadcn defaults.
@@ -31,9 +26,7 @@ const MAX_MESSAGE_LENGTH = 150;
  *
  * Elevation comes from `surface-raised` / `surface-inset` rather than a step on
  * the tone scale, because tone-5 is the page on every theme and a panel painted
- * in tone-6 ends up DARKER than the page on all five dark palettes — which is
- * what made this form look like a hole. Each theme sets its own pair in
- * globals.css, so this works on ocean and tangerine as well as `.dark`.
+ * in tone-6 ends up DARKER than the page on all five dark palettes.
  */
 const FIELD_CLASS =
   'bg-surface-inset text-tone-0 placeholder:text-tone-0/35 ' +
@@ -41,18 +34,6 @@ const FIELD_CLASS =
   'hover:border-tone-0/20 ' +
   'focus-visible:border-brand focus-visible:ring-brand/25 focus-visible:ring-[3px] ' +
   'aria-invalid:border-danger aria-invalid:ring-danger/20';
-
-const contactSchema = z.object({
-  email: z.email('That email address looks off').max(254),
-  msg: z
-    .string()
-    .trim()
-    .min(1, 'Write a message first')
-    .max(
-      MAX_MESSAGE_LENGTH,
-      `Message must be under ${MAX_MESSAGE_LENGTH} characters`,
-    ),
-});
 
 type FieldErrors = { email?: string; msg?: string };
 

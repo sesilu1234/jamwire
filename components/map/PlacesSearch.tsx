@@ -1,6 +1,6 @@
 // 'use client';
 // import { useState, useRef, useEffect } from 'react';
-// import { useMapContext } from './MapContext';
+// import { useMapContext } from '@/components/map/MapContext';
 
 // type Place = {
 //   display_name: string;

@@ -178,6 +178,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(99.5% 0.001 106.423);
   --surface-inset: oklch(96.5% 0.002 48.717);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 .slate {
@@ -243,6 +269,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(31% 0.009 219);
   --surface-inset: oklch(20% 0.007 218);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 .tangerine {
@@ -308,6 +360,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(31% 0.016 57);
   --surface-inset: oklch(20% 0.011 53);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 .ocean {
@@ -373,6 +451,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(27% 0.042 242);
   --surface-inset: oklch(17% 0.028 246);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 .dark {
@@ -445,6 +549,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(31% 0.009 219);
   --surface-inset: oklch(20% 0.007 218);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 .forest {
@@ -510,6 +640,32 @@
      raise towards grey while the page stays put. */
   --surface-raised: oklch(27% 0.032 142);
   --surface-inset: oklch(17% 0.018 147);
+
+  /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
+     These ship from shadcn as fixed greys, and every theme block below was
+     carrying the SAME literal values (--input: oklch(0.922 0 0) etc). That is
+     why stock components rendered a white box with grey text on a dark page no
+     matter which theme was picked. Deriving them from tone-* here fixes every
+     component that uses them — Card, Select, Dialog, Popover, Calendar,
+     Slider — instead of each one being overridden at its call site. */
+  --background: var(--tone-5);
+  --foreground: var(--tone-0);
+  --card: var(--surface-raised);
+  --card-foreground: var(--tone-0);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--tone-0);
+  --muted: var(--surface-inset);
+  --muted-foreground: color-mix(in oklch, var(--tone-0) 60%, transparent);
+  --accent: color-mix(in oklch, var(--tone-0) 10%, transparent);
+  --accent-foreground: var(--tone-0);
+  /* --input is shadcn's *border* colour for fields (plus a faint fill via
+     `dark:bg-input/30`), not the field background. */
+  --input: color-mix(in oklch, var(--tone-0) 15%, transparent);
+  --border: color-mix(in oklch, var(--tone-0) 12%, transparent);
+  --ring: color-mix(in oklch, var(--tone-0) 30%, transparent);
+  --primary: var(--tone-0);
+  --primary-foreground: var(--tone-6);
+  --destructive: var(--danger);
 }
 
 @layer base {
