@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 
@@ -39,19 +40,19 @@ export default function JamSessionList() {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/40">
         {showPanelDelete && (
-          <div className=" flex flex-col gap-2 bg-white p-4 rounded-md shadow-xl w-96 max-w-[70%] ">
+          <div className="flex w-96 max-w-[70%] flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 shadow-2xl">
             <p className="font-seminbold">
               Type <i className="font-medium">delete</i> to confirm
             </p>
 
             <input
-              className="border border-black  w-full py-1 px-3 mt-2 rounded-md"
+              className="mt-2 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition-colors focus:border-zinc-500 focus:ring-4 focus:ring-zinc-900/5"
               placeholder="delete"
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
 
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex justify-end gap-2">
              <button
   onClick={async () => {
     setShowPanelDelete(false);
@@ -59,18 +60,14 @@ export default function JamSessionList() {
     setIdToDelete(null);
   }}
   disabled={text.toLowerCase() !== 'delete'}
-  className={
-    text.toLowerCase() === 'delete'
-      ? 'bg-red-400 hover:bg-rose-500 px-3 py-1 rounded-md'
-      : 'opacity-50 px-3 py-1'
-  }
+  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-red-700 bg-red-600 px-4 text-sm font-bold tracking-tight text-white shadow-[3px_3px_0_0_rgba(185,28,28,0.45)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-red-700 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(185,28,28,0.45)] disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none"
 >
   Accept
 </button>
 
               <button
                 onClick={() => setIdToDelete(null)}
-                className="bg-gray-400/40 px-3 py-1 rounded-md hover:bg-gray-400/70"
+                className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-[#1B1F2A] bg-white px-4 text-sm font-bold tracking-tight text-[#1B1F2A] shadow-[3px_3px_0_0_rgba(27,31,42,0.45)] transition-[transform,box-shadow] duration-150 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(27,31,42,0.45)]"
               >
                 Cancel
               </button>
@@ -108,14 +105,14 @@ export default function JamSessionList() {
 
   if (loading)
     return (
-      <div className="flex flex-col mt-8 gap-6">
+      <div className="mt-10 flex flex-col gap-4">
         <SkeletonCard />
         <SkeletonCard />
       </div>
     );
 
   return (
-    <div className=" flex flex-col mt-8 gap-6">
+    <div className="mt-10 flex flex-col gap-4">
       {jams.map((jam, i) => (
         <Jam
           key={i}
@@ -137,12 +134,12 @@ export default function JamSessionList() {
       group relative flex items-center justify-center
       h-24 md:h-24 w-3/10 min-w-[200px] max-w-[320px]
       rounded-2xl
-      border border-zinc-300 bg-white/50 backdrop-blur-md
-      transition-all duration-500 ease-out
-      hover:border-zinc-700 hover:bg-white/80
-      hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]
-      hover:-translate-y-1
-      active:scale-[0.98]
+      border border-[#1B1F2A] bg-white
+      shadow-[4px_4px_0_0_rgba(27,31,42,0.5)]
+      transition-[transform,box-shadow] duration-150 ease-out
+      hover:shadow-[6px_6px_0_0_rgba(27,31,42,0.6)]
+      active:translate-x-0.5 active:translate-y-0.5
+      active:shadow-[2px_2px_0_0_rgba(27,31,42,0.5)]
     "
         >
           {/* Subtle Inner Glow */}
@@ -155,10 +152,10 @@ export default function JamSessionList() {
   rounded-xl bg-zinc-900/00 border-2 text-black
   transition-all duration-500 ease-spring
   
-  group-hover:bg-yellow-400 
+  group-hover:bg-brand
   group-hover:rotate-90
-  
-  group-active:bg-yellow-400
+
+  group-active:bg-brand
   group-active:rotate-90
 "
             >
@@ -228,87 +225,85 @@ function Jam({
   deleteJam,
 }: JamProps) {
   return (
-    <div className={`flex items-center gap-8 py-4 mx-auto container transition-opacity`}>
-      
-      {/* IMAGE CONTAINER */}
-      <div className="w-3/10 h-32 relative">
-      <Image
-  src={jam_image_src}
-  alt={jam_title}
-  fill
-  sizes="(max-width: 1280px) 30vw, 400px"
-  // Use backticks (`) and move the logic inside the curly braces
-  className={`object-cover rounded-lg transition-opacity ${
-    !is_validated ? 'opacity-50' : 'opacity-100'
-  }`}
-/>
-        
-        {/* VALIDATION BADGE */}
+    /* The whole card is the "View" target now, via an overlay link rather than
+       wrapping everything in an <a> — Edit is itself a link, and an anchor
+       inside an anchor is invalid. The actions sit above it on z-10 so their
+       clicks don't fall through to the card. */
+    <div className="group relative flex items-center gap-6 rounded-2xl border border-[#1B1F2A]/12 bg-white p-4 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-20px_rgba(27,31,42,0.55)]">
+      <Link
+        href={`/jam/${jam_slug}`}
+        prefetch={false}
+        aria-label={`Open ${jam_title}`}
+        className="absolute inset-0 z-0 rounded-2xl focus-visible:ring-2 focus-visible:ring-[#1B1F2A]/40 focus-visible:outline-none"
+      />
+
+      {/* IMAGE */}
+      <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-xl bg-zinc-100">
+        <Image
+          src={jam_image_src}
+          alt={jam_title}
+          fill
+          sizes="176px"
+          className={`object-cover transition-transform duration-300 group-hover:scale-[1.04] ${
+            !is_validated ? 'opacity-60' : 'opacity-100'
+          }`}
+        />
+
         {!is_validated && (
-          <div className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] uppercase font-bold max-w-3/4 px-2 py-1 rounded shadow-md flex items-center gap-1">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse flex shrink-0" />
-            Pending Review
+          <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-amber-500 px-2 py-1 text-[10px] font-bold uppercase text-white shadow-md">
+            <span className="flex h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-white" />
+            Pending
           </div>
         )}
       </div>
 
-      {/* TEXT CONTENT */}
-      <div className="flex flex-col w-4/10 px-[20px]">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold line-clamp-2">{jam_title}</h3>
-          {!is_validated && (
-            <span className="text-amber-600 text-xs font-medium hidden sm:inline">
-              (In validation)
-            </span>
-          )}
-        </div>
-
-        <h1 className="text-sm text-gray-600 font-semibold line-clamp-2">
+      {/* TEXT */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <h3 className="truncate text-xl font-extrabold tracking-tight">
+          {jam_title}
+        </h3>
+        <p className="mt-1 truncate text-sm font-medium text-[#1B1F2A]/55">
           {jam_adress}
-        </h1>
+        </p>
+        {!is_validated && (
+          <p className="mt-2 text-xs font-semibold text-amber-600">
+            Waiting for review — not public yet
+          </p>
+        )}
       </div>
 
-      {/* ACTIONS */}
-      <div className="hidden md:flex flex-col md:flex-row items-start gap-4 w-3/10 text-sm md:text-lg">
-        {/* Only show View if validated, or keep it but maybe disable it? */}
-        <Link
-          href={`/jam/${jam_slug}`}
-          prefetch={false}
-          className={`px-3 py-1 rounded-sm border-1 border-black transition-colors ${
-            !is_validated 
-              ? 'bg-zinc-500 opacity-80 hover:bg-zinc-600' 
-              : 'bg-zinc-700 text-zinc-100 hover:bg-zinc-800'
-          }`}
-         
-        >
-          View
-        </Link>
-
+      {/* ACTIONS — View is gone: the card itself does that now, which leaves
+          two real choices instead of three competing small buttons. */}
+      <div className="relative z-10 hidden shrink-0 items-center gap-3 md:flex">
         <Link
           href={`/host/edit/${id}`}
           prefetch={false}
-          className="px-3 py-1 rounded-sm md:ml-[20px] bg-zinc-200 text-zinc-900 hover:bg-zinc-300 border-1 border-black"
+          className="inline-flex h-11 items-center justify-center rounded-lg border border-[#1B1F2A] bg-[#1B1F2A] px-6 text-sm font-bold tracking-tight text-white transition-colors duration-150 hover:bg-[#2E3440]"
         >
           Edit
         </Link>
 
         <button
-          className="px-3 py-1 rounded-sm bg-red-500/90 text-white hover:bg-red-700"
+          type="button"
           onClick={() => deleteJam(id)}
+          aria-label={`Delete ${jam_title}`}
+          className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-[#1B1F2A]/15 bg-white text-[#1B1F2A]/45 transition-colors duration-150 hover:border-red-600 hover:bg-red-600 hover:text-white"
         >
-          Delete
+          <Trash2 className="size-4" strokeWidth={2} />
         </button>
       </div>
-      
-      <MobileMenu jam_slug={jam_slug} id={id} deleteJam={deleteJam} />
+
+      <div className="relative z-10">
+        <MobileMenu jam_slug={jam_slug} id={id} deleteJam={deleteJam} />
+      </div>
     </div>
   );
 }
 export function SkeletonCard() {
   return (
-    <div className="flex items-center gap-8 py-4 mx-auto container">
-      <Skeleton className=" w-3/10 h-32 rounded-xl" />
-      <div className="space-y-2 w-4/10">
+    <div className="flex items-center gap-6 rounded-2xl border border-[#1B1F2A]/12 bg-white p-4">
+      <Skeleton className="h-28 w-44 shrink-0 rounded-xl" />
+      <div className="w-4/10 space-y-2">
         <Skeleton className="h-4 " />
         <Skeleton className="h-4 " />
         <Skeleton className="h-4" />

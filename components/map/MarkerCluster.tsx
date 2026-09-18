@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMapContext } from './MapContext';
+import { useMapContext } from '@/components/map/MapContext';
 import { Card, CardContent } from '@/components/ui/card';
 import './markersStyle.css';
 

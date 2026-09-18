@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
+import { contactSchema } from '@/lib/contact';
 
 
 
@@ -11,12 +11,6 @@ export async function POST(req: Request) {
 
     const sender_ip = req.headers.get('x-forwarded-for')?.split(',')[0] || null;
     const user_agent = req.headers.get('user-agent') || null;
-
-
-    const contactSchema = z.object({
-    email: z.string().email().max(150),
-    msg: z.string().max(150),
-  });
 
 
   const parsed = contactSchema.safeParse(body);

@@ -9,36 +9,37 @@ import { redirect } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import JamSessionList from './jamSessionList';
 import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
   if (!session) redirect('/signIn');
 
+  // Warm paper rather than pure white: #FFFFFF across a full-width layout
+  // reads clinical, and the brand is an amber wordmark. Still theme-agnostic —
+  // a fixed colour, not a token.
   return (
-    <div className="min-h-screen bg-white/85 text-black ">
+    <div className="min-h-screen bg-[#FAF8F4] text-[#1B1F2A]">
       <div className="w-[1300px] max-w-[90%] mx-auto pt-12 pb-128">
-        <div className="flex justify-between  p">
-          <div className="flex flex-col relative ml-3 flex  items-center gap-2">
-            <h3 className="font-bold text-5xl">{BRAND.nameLower}</h3>
-            <p className="text-xs pt- text-gray-800 font-semibold"></p>
-          </div>
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label={BRAND.name} className="ml-3 inline-block">
+            <BrandLogo className="h-10 w-auto object-contain" />
+          </Link>
 
-          <div className="w-16 h-16 ">
-            <Avatar>
-              <AvatarImage
-                src={session.user?.image || 'https://github.com/shadcn.png'}
-                className="rounded-full"
-              />
-              <AvatarFallback>
-                {session.user?.name ? session.user.name[0] : 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <Avatar className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-200 ring-1 ring-black/10">
+            <AvatarImage
+              src={session.user?.image || ''}
+              className="h-full w-full rounded-full object-cover"
+            />
+            <AvatarFallback className="text-sm font-semibold text-zinc-600">
+              {session.user?.name ? session.user.name[0] : 'U'}
+            </AvatarFallback>
+          </Avatar>
         </div>
         <div className="flex flex-col gap-8 mt-4 ml-3">
           <Link href="/">
-            <div className="flex gap-4 items-center font-semibold cursor-pointer">
+            <div className="flex w-fit cursor-pointer items-center gap-3 font-semibold text-zinc-700 transition-colors hover:text-black">
               <svg
                 width="16"
                 height="16"
@@ -48,7 +49,7 @@ export default async function Home() {
               >
                 <path
                   d="M4.40527 12.65H23V10.35H4.40527L13.1395 1.61575L11.5 0L0 11.5L11.5 23L13.1395 21.3842L4.40527 12.65Z"
-                  fill="#1F1F1F"
+                  fill="currentColor"
                 />
               </svg>
               <h1 className="text-sm hover:underline">Back to home page</h1>
@@ -72,7 +73,17 @@ export default async function Home() {
     Welcome back, <span className="text-zinc-100 font-bold ml-1">{session.user?.display_name}</span>
   </h3>
 </div>
-          <h3 className="font-bold text-3xl ml-6 md:ml-24 mt-4">Your jams</h3>
+          <div className="mt-6 ml-6 md:ml-24">
+            <h3 className="text-5xl font-extrabold tracking-tighter uppercase md:text-6xl">
+              Your jams
+            </h3>
+            <div className="mt-4 flex items-center gap-4">
+              <span className="h-1 w-14 shrink-0 bg-brand" />
+              <p className="text-sm font-medium text-[#1B1F2A]/50">
+                Everything you&apos;ve put on the map.
+              </p>
+            </div>
+          </div>
         </div>
 
         <JamSessionList />

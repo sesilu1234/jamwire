@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import { User } from "lucide-react";
+import { LogIn, Mail, Menu, User } from "lucide-react";
 
 import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -55,6 +55,7 @@ import {
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -62,9 +63,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
-import { z } from 'zod';
-const MAX_MESSAGE_LENGTH = 500;
+import { contactSchema } from '@/lib/contact';
+
+
 
 
 export default function DropdownMenuNotSignedIn() {
@@ -74,25 +75,18 @@ export default function DropdownMenuNotSignedIn() {
 
 
 
-	 const contactSchema = z.object({
-	   email: z
-		 .email('Invalid email format')
-		 .max(254),
-	   msg: z
-		 .string()
-		 .trim()
-		 .min(1, 'Message is required')
-		 .max(MAX_MESSAGE_LENGTH, `Message must be under ${MAX_MESSAGE_LENGTH} characters`),
-	 });
 	 
 
 
-	const sendData = async (email: string, msg: string) => {
-  await fetch('/api/public/users-suggestions', {
+  const sendData = async (email: string, msg: string) => {
+  // Returns the response so the caller can tell a 400/500 from a success.
+  // It used to ignore the result entirely and always report "Message sent".
+  const res = await fetch('/api/public/users-suggestions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, msg }),
   });
+  if (!res.ok) throw new Error(`send failed: ${res.status}`);
 };
 
 const [email, setEmail] = useState('');
@@ -124,6 +118,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     toast.success('Message sent', {
       description: 'Thank you for helping the community stay updated.',
     });
+  } catch {
+    toast.error("That didn't go through", {
+      description: 'Try again in a moment.',
+    });
   } finally {
     setIsSending(false);
   }
@@ -133,41 +131,34 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		<div>
 			<DropdownMenu modal={false}>
 				<DropdownMenuTrigger asChild>
-					<button>
-						<div
-  className="shadow-md hover:shadow-lg active:shadow-lg hover:bg-tone-4 active:bg-tone-4 transition-transform transition-colors duration-200 cursor-pointer px-2 py-1 rounded-sm border-2 border-tone-1 select-none active:scale-95"
->
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="currentColor"
-								className="w-6 h-6"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-								/>
-							</svg>
-						</div>
+					<button
+						aria-label="Menu"
+						className="inline-flex h-12 w-12 cursor-pointer items-center justify-center
+						           rounded border border-transparent bg-transparent text-tone-1/80
+						           transition-colors select-none
+						           hover:bg-tone-0/8 hover:text-tone-0
+						           data-[state=open]:bg-tone-0/10 data-[state=open]:text-tone-0
+						           focus-visible:ring-2 focus-visible:ring-tone-0/25 focus-visible:outline-none"
+					>
+						<Menu className="size-6 shrink-0" strokeWidth={1.75} />
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
-					className="w-40 relative top-5 z-[500]"
+					className="w-56 z-[500] bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
 					align="end"
+					sideOffset={8}
 				>
-					<DropdownMenuLabel>Create a Jam</DropdownMenuLabel>
+					<DropdownMenuLabel>Account</DropdownMenuLabel>
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link href="/signIn">Sign In</Link>
+							<Link href="/signIn">
+								<LogIn />
+								Sign in
+							</Link>
 						</DropdownMenuItem>
 
-						<DropdownMenuItem disabled>
-							<div className="h-[1.5px] bg-tone-0/40 w-full "></div>
-						</DropdownMenuItem>
 					</DropdownMenuGroup>
+					<DropdownMenuSeparator />
 					<DropdownMenuLabel>Settings</DropdownMenuLabel>
 					<DropdownMenuGroup>
 						<div className="px-0 py-0">
@@ -177,71 +168,84 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 							<AccordionLanguage />
 						</div>
 						<DropdownMenuItem onSelect={() => setShowShareDialog(true)}>
+							<Mail />
 							Contact
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-[425px] z-[1000] text-black">
-            {/* Wrap contents in a form */}
-            <form onSubmit={handleSubmit}>
-                <DialogHeader>
-                    <DialogTitle>Contact the Developer</DialogTitle>
-                    <DialogDescription>
-                        Send a message if you have questions or feedback about this website.
-                    </DialogDescription>
-                </DialogHeader>
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="z-[1000] border border-tone-0/15 bg-surface-raised text-tone-0 sm:max-w-[440px]">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>Contact the developer</DialogTitle>
+              <DialogDescription className="text-tone-0/60">
+                Questions, feedback, or something wrong on the map.
+              </DialogDescription>
+            </DialogHeader>
 
-                <FieldGroup className="py-3">
-                    <Field>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="shadcn@vercel.com"
-                            autoComplete="off"
-                            required
-                        />
-                    </Field>
-                    <Field>
-                        <Label htmlFor="message">Message</Label>
-                        <Textarea
-                            id="message"
-                            name="message"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Any questions or feedback"
-                            required
-                        />
-                    </Field>
-                </FieldGroup>
+            <FieldGroup className="gap-5 py-5">
+              <Field>
+                <Label htmlFor="contact-email" className="text-tone-0/80">
+                  Email
+                </Label>
+                <Input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="border-tone-0/15 bg-surface-inset text-tone-0 placeholder:text-tone-0/35"
+                  required
+                />
+              </Field>
 
-                <DialogFooter className="gap-4">
-                    <DialogClose asChild>
-                        <Button type="button" variant="outline" className="border-2 border-black hover:opacity-60 hover:text-black">
-                            Cancel
-                        </Button>
-                    </DialogClose>
-                    {/* This button triggers the form's onSubmit */}
-                    <Button type="submit" disabled={isSending} className="border-2 border-red">
-                        Send
-                    </Button>
-                </DialogFooter>
-            </form>
+              <Field>
+                <Label htmlFor="contact-message" className="text-tone-0/80">
+                  Message
+                </Label>
+                <Textarea
+                  id="contact-message"
+                  name="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tell us what happened."
+                  className="min-h-28 resize-none border-tone-0/15 bg-surface-inset text-tone-0 placeholder:text-tone-0/35"
+                  required
+                />
+              </Field>
+            </FieldGroup>
+
+            <DialogFooter className="gap-2">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant={null}
+                  className="bg-tone-0/10 text-tone-0/70 hover:bg-tone-0/15 hover:text-tone-0"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                disabled={isSending}
+                className="bg-brand px-6 font-semibold text-brand-ink hover:bg-brand/85 hover:text-brand-ink disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSending ? 'Sending' : 'Send'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
-    </Dialog>
-	 <Toaster />
+      </Dialog>
 		</div>
 	);
 }
 
 import { Sun, Moon, Coffee, Droplet, Leaf, Rocket } from "lucide-react";
-import { useTheme } from "../ThemeProvider";
+import { useTheme } from '@/app/ThemeProvider';
 
 export function AccordionTheme() {
 	const { theme, setTheme } = useTheme(); // use context
@@ -270,12 +274,12 @@ export function AccordionTheme() {
 								key={t}
 								onClick={() => setTheme(t)}
 								className={`flex items-center gap-2 px-4 py-1 text-left rounded-md ${
-									theme === t ? "font-bold" : "hover:bg-accent hover:underline"
+									theme === t ? "font-bold" : "hover:bg-tone-0/8"
 								}`}
 							>
 								<Icon
 									className={`w-4 h-4 ${
-										theme === t ? iconColors[t] : "text-gray-400/80"
+										theme === t ? iconColors[t] : "text-tone-0/40"
 									}`}
 								/>
 								{t.charAt(0).toUpperCase() + t.slice(1)}

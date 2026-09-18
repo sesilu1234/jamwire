@@ -6,29 +6,17 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Map as LeafletMap } from 'leaflet';
+import type { Map as LeafletMap } from 'leaflet';
+import {
+  MapContext,
+  type LocationSearch,
+  type Marker,
+} from '@/components/map/MapContext';
+export type { LocationSearch, SearchLocation } from '@/components/map/MapContext';
 
 import Cookies from 'js-cookie';
 const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
-export type LocationSearch = {
-  coordinates: { lat: number; lng: number };
-};
-
-export type SearchLocation = string;
-
-type MapContextType = {
-  map: LeafletMap | null;
-  setMap: React.Dispatch<React.SetStateAction<LeafletMap | null>>;
-  locationSearch: LocationSearch | null;
-  googleSearchLocation: SearchLocation | null;
-  setGoogleSearchLocation: React.Dispatch<React.SetStateAction<SearchLocation>>;
-  setLocationSearch: React.Dispatch<
-    React.SetStateAction<LocationSearch | null>
-  >;
-  markersData: Marker[];
-  setMarkersData: React.Dispatch<React.SetStateAction<Marker[]>>;
-};
 
 interface MapProviderProps {
   children: React.ReactNode;
@@ -42,22 +30,10 @@ interface MapProviderProps {
    currentUsedPath: string;
 }
 
-type Marker = {
-  id: string;
-  lat: number;
-  lng: number;
-};
 
 import { JamCard } from '@/types/jam';
 import { usePathname } from 'next/navigation'
 
-const MapContext = createContext<MapContextType | undefined>(undefined);
-
-export const useMapContext = () => {
-  const ctx = useContext(MapContext);
-  if (!ctx) throw new Error('useMapContext must be used within MapProvider');
-  return ctx;
-};
 
 export const MapProvider = ({
   children,
@@ -67,6 +43,8 @@ export const MapProvider = ({
 }: MapProviderProps) => {
   
   const [map, setMap] = useState<LeafletMap | null>(null);
+  // 60km matches the default distance in the filter panel.
+  const [searchRadiusKm, setSearchRadiusKm] = useState<number | null>(60);
   const [locationSearch, setLocationSearch] = useState<LocationSearch | null>({
     coordinates: {
       lat: initialUserLocation.latitude,
@@ -152,6 +130,8 @@ export const MapProvider = ({
         setGoogleSearchLocation,
         markersData,
         setMarkersData,
+        searchRadiusKm,
+        setSearchRadiusKm,
       }}
     >
       {children}

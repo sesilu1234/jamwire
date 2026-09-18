@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import PrimaryFields from './PrimaryFields';
 import { GeneralInfoProps } from './types/types';
@@ -24,13 +23,27 @@ import { formAtom } from '../store/jotai';
 
 import { useFormStore } from '../store/formStore'; // path a tu store
 
-import { Card, CardTitle, FieldLabel } from './ui';
+import {
+  Card,
+  CardTitle,
+  FieldLabel,
+  inputSkin,
+  selectPopoverSkin,
+} from './ui';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Clock } from 'lucide-react';
 
 export default function EditArea({
   data,
   childSaveOnUnmount,
 }: GeneralInfoProps) {
   const setForm = useFormStore((state) => state.setForm);
+
+  const [showAllDates, setShowAllDates] = useState(false);
 
   const [period, setPeriod] = useState<'manual' | 'weekly' | string>(
     data.dates.period,
@@ -96,10 +109,13 @@ export default function EditArea({
     };
   }, []);
 
+  const isWeekly = period === 'weekly';
+
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-10">
       {/* ---------------- the basics ---------------- */}
-      <Card>
+      <Card flat>
         <CardTitle
           title="The basics"
           hint="How the jam shows up in listings and where people will find it."
@@ -113,23 +129,25 @@ export default function EditArea({
       </Card>
 
       {/* ---------------- schedule ---------------- */}
-      <Card>
+      <Card flat>
         <CardTitle
           title="Schedule"
           hint="Repeat it weekly, or pick the exact dates on the calendar."
         />
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex flex-col gap-2">
+        {/* Sized to their content rather than stretched across the card. A
+            3-column grid gave "21:00" the same ~380px as a full address. */}
+        <div className="flex flex-wrap gap-5">
+          <div className="flex flex-col gap-2 w-full sm:w-64">
             <FieldLabel>Repeats</FieldLabel>
             <Select
               defaultValue={period}
               onValueChange={(value) => setPeriod(value as 'manual' | 'weekly')}
             >
-              <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-[14px]">
+              <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-2.5 text-[14px]">
                 <SelectValue placeholder="Select a period" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectPopoverSkin}>
                 <SelectGroup>
                   <SelectLabel>Period</SelectLabel>
                   <SelectItem value="manual">
@@ -142,7 +160,7 @@ export default function EditArea({
           </div>
 
           {/* Second select */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 w-full sm:w-52">
             <FieldLabel
               className={period === 'weekly' ? '' : 'text-zinc-300'}
             >
@@ -159,10 +177,10 @@ export default function EditArea({
                 }
                 onValueChange={setWeekDay}
               >
-                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-[14px]">
+                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-50/60 py-2.5 text-[14px]">
                   <SelectValue placeholder="Select day of week" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={selectPopoverSkin}>
                   <SelectGroup>
                     <SelectLabel>Day</SelectLabel>
                     {daysOfWeek.map((day) => (
@@ -175,31 +193,34 @@ export default function EditArea({
               </Select>
             ) : (
               <Select disabled>
-                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-100/70 py-5 text-[14px]">
+                <SelectTrigger className="w-full rounded-xl border-zinc-200 bg-zinc-100/70 py-2.5 text-[14px]">
                   <SelectValue placeholder="N/A" />
                 </SelectTrigger>
               </Select>
             )}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <FieldLabel htmlFor="time-from">Starting time</FieldLabel>
-            <Input
-              type="time"
-              id="time-from"
-              step="60"
-              value={fromTime}
-              onChange={(e) => setFromTime(e.target.value)}
-              className="w-full appearance-none rounded-xl border-zinc-200 bg-zinc-50/60 py-5 text-center text-[14px] tabular-nums"
-            />
+          <div className="flex flex-col gap-2 w-full sm:w-32">
+            <FieldLabel>Starting time</FieldLabel>
+            <TimeField value={fromTime} onChange={setFromTime} />
           </div>
         </div>
 
-        {/* ---------------- calendar ---------------- */}
-        <div className="mt-7 border-t border-zinc-100 pt-6">
+        {/* ---------------- calendar ----------------
+            On Weekly the calendar is dimmed and inert rather than removed: it
+            stays visible so it's obvious that picking exact dates is an option,
+            which a hidden section wouldn't tell anyone. */}
+        <div
+          className={`mt-7 border-t border-zinc-100 pt-6 transition-opacity ${
+            isWeekly ? 'pointer-events-none opacity-45 select-none' : ''
+          }`}
+          aria-disabled={isWeekly}
+        >
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[13px] leading-snug text-zinc-500">
-              Pick the dates below — each one keeps the starting time above.
+              {isWeekly
+                ? 'Not used on Weekly — switch Repeats to "Select manually on calendar" to pick exact dates.'
+                : 'Pick the dates below — each one keeps the starting time above.'}
             </p>
             <button
               type="button"
@@ -230,25 +251,128 @@ export default function EditArea({
                   No dates selected yet.
                 </span>
               ) : null}
-              {dates.slice(0, 3).map((date, i) => (
+              {/* Collapsed to 3 by default; "+N more" expands the rest instead
+                  of only counting them, so a long list can actually be checked.
+                  Each chip can be dropped individually — only meaningful in
+                  manual mode, since Weekly is a single flag on the row rather
+                  than a set of dates. */}
+              {(showAllDates ? dates : dates.slice(0, 3)).map((date, i) => (
                 <span
-                  key={i}
-                  className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-medium tabular-nums text-emerald-800 ring-1 ring-inset ring-emerald-600/15"
+                  key={date.getTime()}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 py-1 pr-1.5 pl-3 text-[12px] font-medium tabular-nums text-emerald-800 ring-1 ring-emerald-600/15 ring-inset"
                 >
-                  {date.toLocaleDateString()} · {fromTime}{' '}
-                  {/* use state directly */}
+                  {date.toLocaleDateString()} · {fromTime}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${date.toLocaleDateString()}`}
+                    onClick={() =>
+                      setDates(dates.filter((d) => d.getTime() !== date.getTime()))
+                    }
+                    className="grid h-4 w-4 cursor-pointer place-items-center rounded-full text-emerald-800/50 transition-colors hover:bg-emerald-600/15 hover:text-emerald-900"
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
               {dates.length > 3 && (
-                <span className="text-[12px] font-medium text-zinc-500">
-                  +{dates.length - 3} more
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAllDates((prev) => !prev)}
+                  className="cursor-pointer text-[12px] font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-800"
+                >
+                  {showAllDates ? 'Show less' : `+${dates.length - 3} more`}
+                </button>
               )}
             </div>
           </div>
         </div>
       </Card>
     </div>
+  );
+}
+
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) =>
+  String(i).padStart(2, '0'),
+);
+/** Five-minute granularity: jams start at 21:00 or 21:30, never at 21:37. */
+const MINUTE_OPTIONS = Array.from({ length: 12 }, (_, i) =>
+  String(i * 5).padStart(2, '0'),
+);
+
+/**
+ * Compact time field.
+ *
+ * `<input type="time">` keeps the field small but opens the browser's own
+ * picker — that blue scrolling column is drawn by the OS, outside the page, so
+ * no CSS can bring it in line with this form (and it looks different again on
+ * Safari and Firefox). This keeps the single compact field and replaces only
+ * the popup. Still reads and writes the same "HH:MM" string.
+ */
+function TimeField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const [hour, minute] = (value || '21:00').split(':');
+  // A stored value off the 5-minute grid stays selectable rather than vanishing.
+  const minutes = MINUTE_OPTIONS.includes(minute)
+    ? MINUTE_OPTIONS
+    : [...MINUTE_OPTIONS, minute].sort();
+
+  const column =
+    'flex max-h-56 flex-1 flex-col gap-0.5 overflow-y-auto p-1.5 [scrollbar-width:thin]';
+  const cell = (active: boolean) =>
+    `shrink-0 cursor-pointer rounded-lg px-2 py-1.5 text-[13px] tabular-nums transition-colors ${
+      active
+        ? 'bg-emerald-600 font-semibold text-white'
+        : 'text-zinc-700 hover:bg-zinc-100'
+    }`;
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={`${inputSkin} flex cursor-pointer items-center justify-between text-left`}
+        >
+          <span className="tabular-nums">{value || '--:--'}</span>
+          <Clock className="size-4 shrink-0 text-zinc-400" strokeWidth={1.75} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-40 border-zinc-200 bg-white p-0 shadow-lg ring-1 ring-zinc-900/5"
+      >
+        <div className="flex divide-x divide-zinc-100">
+          <div className={column}>
+            {HOUR_OPTIONS.map((h) => (
+              <button
+                key={h}
+                type="button"
+                className={cell(h === hour)}
+                onClick={() => onChange(`${h}:${minute}`)}
+              >
+                {h}
+              </button>
+            ))}
+          </div>
+          <div className={column}>
+            {minutes.map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={cell(m === minute)}
+                onClick={() => onChange(`${hour}:${m}`)}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -288,6 +412,8 @@ export function Calendar03({
       if (dayIndex === -1) return;
 
       const today = new Date();
+      // Midnight, so a jam earlier today still counts as upcoming.
+      today.setHours(0, 0, 0, 0);
       const newDates: Date[] = [];
 
       // fill next 3 months with that weekday
@@ -299,7 +425,10 @@ export function Calendar03({
 
         for (let d = firstDay.getDate(); d <= lastDay.getDate(); d++) {
           const date = new Date(year, month, d);
-          if (date.getDay() === dayIndex) newDates.push(date);
+          // Filling from the 1st of the current month used to select dates
+          // that had already passed.
+          if (date.getDay() === dayIndex && date >= today)
+            newDates.push(date);
         }
       }
 
@@ -314,7 +443,16 @@ export function Calendar03({
       required
       selected={dates}
       onSelect={datesSetter}
-      className="mx-auto w-fit rounded-xl border border-zinc-200 bg-zinc-50/40 p-3 shadow-none"
+      // The day button styles itself from --primary / --accent, which follow
+      // the app theme — on a dark theme that made a selected day near-white on
+      // a white calendar (invisible) and turned the number near-white on hover
+      // (it looked like the number vanished). Pinned to the form's own palette.
+      className="mx-auto w-fit rounded-xl border border-zinc-200 bg-zinc-50/40 p-3 shadow-none
+                 [&_[data-selected-single=true]]:!bg-emerald-600
+                 [&_[data-selected-single=true]]:!text-white
+                 [&_[data-selected-single=true]]:!font-semibold
+                 [&_button:not([data-selected-single=true]):hover]:!bg-zinc-200
+                 [&_button:not([data-selected-single=true]):hover]:!text-zinc-900"
     />
   );
 }

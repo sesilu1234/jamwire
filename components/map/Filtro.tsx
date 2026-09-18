@@ -2,12 +2,15 @@
 import { useState, useRef, useEffect } from 'react';
 
 import { Slider } from '@/components/ui/slider';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
-import { useMapContext } from './MapContext';
+import {
+  Calendar as CalendarIcon,
+  SlidersHorizontal,
+} from 'lucide-react';
+import { useMapContext } from '@/components/map/MapContext';
+import { toast } from 'sonner';
 
-import L from 'leaflet';
 
 type Marker = {
   id: string;
@@ -24,6 +27,53 @@ type FiltroProps = {
   setLoading: Dispatch<SetStateAction<boolean>>;
   setSearchType: Dispatch<SetStateAction<'local' | 'global'>>;
 };
+
+
+
+/**
+ * One chip style for every toggle in the panel — the date options, the custom
+ * date trigger and the modality buttons. They were three different treatments
+ * before: `bg-black/20` fading to `bg-black/70` white-on-black on hover, a
+ * permanent lifted shadow, and `opacity-40` ghosting. The hover is now a step
+ * within the same palette instead of an inversion.
+ */
+function chipClass(active: boolean) {
+  return [
+    // No borders at all: an outline on every chip made the row look like a
+    // grid of boxes, and outlining only the selected one wasn't a strong
+    // enough signal to read at a glance.
+    'inline-flex items-center justify-center gap-2 rounded-lg',
+    'px-4 py-2.5 text-xs font-bold tracking-wider uppercase',
+    'cursor-pointer select-none transition-colors duration-150',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/30',
+    // Emerald is already what "selected" looks like elsewhere in the app (the
+    // chosen days in the create-jam calendar), and it stays clear of amber,
+    // which means "primary action" on the map.
+    // Ink outline: no fill on either state, so selection reads as a rule and a
+    // weight change rather than a block of colour. Keeps the panel calm and
+    // leaves colour free to mean "action" (amber) everywhere else.
+    active
+      ? 'bg-white text-[#111827] ring-[1.5px] ring-[#111827] ring-inset hover:bg-[#f9fafb]'
+      : 'bg-white text-[#9aa0aa] ring-1 ring-[#e4e7ec] ring-inset hover:text-[#5a5f6b] hover:ring-[#cdd2da]',
+  ].join(' ');
+}
+
+/** "custom: 2026-09-18" -> "18 Sep 2026", falling back to the raw value. */
+function customDateLabel(value: string) {
+  const raw = value.split('custom: ')[1];
+  if (!raw) return 'Custom';
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime())
+    ? raw
+    : parsed.toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+}
+
+export const MIN_DISTANCE_KM = 5;
+export const MAX_DISTANCE_KM = 100;
 
 export default function Filtro({
   setJams,
@@ -115,7 +165,20 @@ export default function Filtro({
 
   const [dateGlobal, setdateGlobal] = useState<Date | undefined>(new Date());
 
-  const { locationSearch, setMarkersData, map } = useMapContext();
+  const { locationSearch, setMarkersData, map, searchRadiusKm, setSearchRadiusKm } =
+    useMapContext();
+
+  // "Search this area" writes a radius derived from the viewport. Mirror it
+  // into the panel so the slider doesn't claim 60km while the map shows 12,
+  // and into the ref directly so a fetch in this same tick uses the new value.
+  // Declared before the locationSearch effect below, which depends on it.
+  useEffect(() => {
+    if (searchRadiusKm != null && searchRadiusKm !== distanceRef.current) {
+      distanceRef.current = searchRadiusKm;
+      distanceHold.current = searchRadiusKm;
+      setDistance(searchRadiusKm);
+    }
+  }, [searchRadiusKm]);
 
   // Close on outside click or Esc
   useEffect(() => {
@@ -174,16 +237,32 @@ export default function Filtro({
       stylesHold.current = [...styles];
       modalityHold.current = [...modality];
 
-      map!.flyTo(
-        [locationSearch!.coordinates.lat, locationSearch!.coordinates.lng],
-        11,
-        { duration: 1.5 },
+      setSearchRadiusKm(distance);
+
+      // Frame the search area instead of jumping to a fixed zoom: at 5km the
+      // old zoom 11 was far too wide, at 100km the area ran off screen.
+      // Bounding box of the search circle, computed without leaflet: importing
+      // it at module scope here breaks SSR, and `map` is only available at
+      // runtime anyway. 111.32km is one degree of latitude; longitude degrees
+      // shrink by cos(lat).
+      const { lat, lng } = locationSearch!.coordinates;
+      const dLat = distance / 111.32;
+      const dLng = distance / (111.32 * Math.cos((lat * Math.PI) / 180));
+      map!.flyToBounds(
+        [
+          [lat - dLat, lng - dLng],
+          [lat + dLat, lng + dLng],
+        ],
+        { duration: 1.5, padding: [24, 24] },
       );
     } else {
       // sync state → refs
       dateOptionsGlobalHold.current = dateOptionsGlobal;
       stylesGlobalHold.current = [...stylesGlobal];
       modalityGlobalHold.current = [...modalityGlobal];
+
+      // A global search is not bounded by a radius, so the circle comes off.
+      setSearchRadiusKm(null);
 
       map!.flyTo(
         [locationSearch!.coordinates.lat, locationSearch!.coordinates.lng],
@@ -249,7 +328,12 @@ export default function Filtro({
         setJams([]);
       }
     } catch (e) {
-      console.log('error fetching jams');
+      // This used to console.log and stop, leaving the previous results on
+      // screen with no sign that the new search had failed.
+      console.error('error fetching jams', e);
+      toast.error("Couldn't load jams", {
+        description: 'Check your connection and try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -273,42 +357,30 @@ export default function Filtro({
   return (
     <>
       {/* Filter button */}
-      <div
+      <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="
-    inline-flex items-center gap-2 px-3 h-10
-    rounded border border-tone-3
-    bg-tone-3
-    text-black
-    cursor-pointer select-none
-    hover:bg-tone-4
-    hover:text-primary-1
-    transition-colors
-    group
-  "
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        className={`inline-flex h-12 shrink-0 cursor-pointer items-center gap-2.5
+                    rounded-lg px-4 font-semibold text-tone-0
+                    transition-colors select-none
+                    focus-visible:ring-2 focus-visible:ring-tone-0/25 focus-visible:outline-none ${
+                      open ? 'bg-tone-0/16' : 'bg-tone-0/8 hover:bg-tone-0/12'
+                    }`}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="19px"
-          viewBox="0 -960 960 960"
-          width="19px"
-          className=" transition-colors duration-200  "
-        >
-          <path
-            d="M120-40v-168q-35-12-57.5-42.5T40-320v-400h80v-160q0-17 11.5-28.5T160-920q17 0 28.5 11.5T200-880v160h80v400q0 39-22.5 69.5T200-208v168h-80Zm320 0v-168q-35-12-57.5-42.5T360-320v-400h80v-160q0-17 11.5-28.5T480-920q17 0 28.5 11.5T520-880v160h80v400q0 39-22.5 69.5T520-208v168h-80Zm320 0v-168q-35-12-57.5-42.5T680-320v-400h80v-160q0-17 11.5-28.5T800-920q17 0 28.5 11.5T840-880v160h80v400q0 39-22.5 69.5T840-208v168h-80ZM120-640v160h80v-160h-80Zm320 0v160h80v-160h-80Zm320 0v160h80v-160h-80ZM160-280q17 0 28.5-11.5T200-320v-80h-80v80q0 17 11.5 28.5T160-280Zm320 0q17 0 28.5-11.5T520-320v-80h-80v80q0 17 11.5 28.5T480-280Zm320 0q17 0 28.5-11.5T840-320v-80h-80v80q0 17 11.5 28.5T800-280ZM160-440Zm320 0Zm320 0Z"
-            className="fill-current"
-          />
-        </svg>
-        <span className="text-md text-tone-0/85  transition-colors duration-200 font-semibold group-hover:text-primary-1 hover:cursor-pointer select-none">
-          FILTER
-        </span>
-      </div>
+        <SlidersHorizontal
+          className="size-[19px] shrink-0 text-brand"
+          strokeWidth={2.5}
+        />
+        <span className="text-sm select-none">Filters</span>
+      </button>
 
       {/* Overlay + Filter Panel */}
       {open && (
         <div className="fixed inset-0 z-[503] flex flex-col items-center pt-5 
                   bg-slate-900/40 backdrop-blur-[1px] transition-all duration-300">
-          <div className="relative   max-w-[80%] md:w-xl ">
+          <div className="relative w-[92%] md:w-xl">
             <div
               ref={panelRef_1}
               className="flex w-fit justify-center items-end gap-0 mx-auto text-tone-6"
@@ -339,9 +411,9 @@ export default function Filtro({
             {cardFiltersOpen ? (
               <div
                 ref={panelRef_2}
-                className="relative bg-white text-black  p-6 pt-0 rounded-md shadow-lg overflow-y-scroll h-[70vh] "
+                className="relative bg-white text-black  p-6 pt-0 rounded-xl shadow-lg overflow-y-auto h-[70vh] "
               >
-                <div className="flex justify-center items-center gap-24  mb-5 mt-5">
+                <div className="flex justify-center mb-5 mt-5">
                   <div className="flex flex-col items-center pt-4 px-8 border-b border-stone-100">
                     <h2 className="text-3xl font-medium text-stone-800 tracking-tight ">
                       Local
@@ -398,14 +470,8 @@ export default function Filtro({
                           <button
                             key={item.id}
                             onClick={() => toggleModality(item.id)}
-                            className={`
-            relative flex items-center justify-center
-            px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider
-            transition-all duration-200 border
-
-            bg-white border-stone-300 text-black shadow-[0_8px_20px_rgba(0,0,0,0.1)] -translate-y-0.5 
-            ${isActive ? ' ' : 'opacity-40 border-stone-300'}
-          `}
+                            type="button"
+                            className={chipClass(isActive)}
                           >
                             {item.label}
                             {/* Subtle dot indicator */}
@@ -503,9 +569,9 @@ export default function Filtro({
             ) : (
               <div
                 ref={panelRef_3}
-                className="relative bg-white text-black   p-6 pt-0 rounded-md shadow-lg h-[70vh] overflow-y-scroll"
+                className="relative bg-white text-black   p-6 pt-0 rounded-xl shadow-lg h-[70vh] overflow-y-auto"
               >
-                <div className="flex justify-center items-center gap-24 mb-5 mt-5">
+                <div className="flex justify-center mb-5 mt-5">
                   <div className="flex flex-col items-center pt-4 px-8 border-b border-stone-100">
                     <h2 className="text-3xl font-medium text-stone-800 tracking-tight ">
                       Global
@@ -561,14 +627,8 @@ export default function Filtro({
                           <button
                             key={item.id}
                             onClick={() => toggleModalityGlobal(item.id)}
-                            className={`
-            relative flex items-center justify-center
-            px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider
-            transition-all duration-200 border
-
-            bg-white border-stone-300 text-black shadow-[0_8px_20px_rgba(0,0,0,0.1)] -translate-y-0.5 
-            ${isActive ? ' ' : 'opacity-40 border-stone-300'}
-          `}
+                            type="button"
+                            className={chipClass(isActive)}
                           >
                             {item.label}
                             {/* Subtle dot indicator */}
@@ -653,32 +713,28 @@ export function DateOptions({
   return (
     <div className="flex flex-wrap  gap-3 pt-8 ml-4">
       {options.slice(0, 2).map((opt) => (
-        <Button
+        <button
           key={opt.value}
-          variant={opt.value === dateOptions ? 'secondary' : undefined}
-          className={`text-md ${
-            opt.value === dateOptions ? 'bg-stone-700 ' : 'opacity-70'
-          }`}
+          type="button"
+          className={chipClass(opt.value === dateOptions)}
           onClick={() => setDateOption(opt.value)}
         >
           {opt.label}
-        </Button>
+        </button>
       ))}
 
       <div className="relative" ref={calRef}>
-        <Button
-          className={`text-md ${
-            dateOptions.startsWith('custom')
-              ? 'hover:bg-black hover:text-white'
-              : 'opacity-70'
-          }`}
-          variant={dateOptions.startsWith('custom') ? 'secondary' : undefined}
+        <button
+          type="button"
+          aria-expanded={showCalendar}
+          className={chipClass(dateOptions.startsWith('custom'))}
           onClick={() => setShowCalendar((prev) => !prev)}
         >
+          <CalendarIcon className="size-3.5 shrink-0" strokeWidth={2.5} />
           {dateOptions.startsWith('custom')
-            ? dateOptions.split('custom: ')[1]
+            ? customDateLabel(dateOptions)
             : 'Custom'}
-        </Button>
+        </button>
 
         {showCalendar ? (
           <CalendarDemo
@@ -719,32 +775,28 @@ export function DateOptionsGlobal({
   return (
     <div className="flex flex-wrap  gap-3 pt-8 ml-4">
       {options.map((opt) => (
-        <Button
+        <button
           key={opt.value}
-          variant={opt.value === dateOptions ? 'secondary' : undefined}
+          type="button"
+          className={chipClass(opt.value === dateOptions)}
           onClick={() => setDateOption(opt.value)}
-          className={`text-md ${
-            opt.value === dateOptions ? 'bg-stone-700 ' : 'opacity-70'
-          }`}
         >
           {opt.label}
-        </Button>
+        </button>
       ))}
 
       <div className="relative" ref={calRef}>
-        <Button
-          variant={dateOptions.startsWith('custom') ? 'secondary' : undefined}
+        <button
+          type="button"
+          aria-expanded={showCalendar}
+          className={chipClass(dateOptions.startsWith('custom'))}
           onClick={() => setShowCalendar((prev) => !prev)}
-          className={`text-md ${
-            dateOptions.startsWith('custom')
-              ? 'hover:bg-black hover:text-white'
-              : 'opacity-70'
-          }`}
         >
+          <CalendarIcon className="size-3.5 shrink-0" strokeWidth={2.5} />
           {dateOptions.startsWith('custom')
-            ? dateOptions.split('custom: ')[1]
+            ? customDateLabel(dateOptions)
             : 'Custom'}
-        </Button>
+        </button>
 
         {showCalendar ? (
           <CalendarDemo
@@ -824,8 +876,10 @@ export function SliderDemo({
 
       <Slider
         value={[distance]} // <-- array necesario
-        min={0}
-        max={100}
+        // 0km could never return a result; MIN_DISTANCE_KM is also the floor
+        // "Search this area" clamps to when you zoom right in.
+        min={MIN_DISTANCE_KM}
+        max={MAX_DISTANCE_KM}
         step={1}
         onValueChange={(val) => setDistance(val[0])} // <-- devolver número
         className={cn('w-[60%] ml-8 ', className)}

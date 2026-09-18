@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
-import { useMapContext } from './MapContext';
+import { useMapContext } from '@/components/map/MapContext';
 import { Search, X } from 'lucide-react'; // npm install lucide-react
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_CLIENT_API_KEY!;

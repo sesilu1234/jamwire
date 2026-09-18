@@ -11,7 +11,6 @@ import {
 } from "draft-js";
 import "draft-js/dist/Draft.css";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { DescriptionType } from "./types/types";
 import { RefObject } from "react";
 import { RawDraftContentState } from "draft-js";
@@ -42,6 +41,8 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 
 	const [italicSelected, setItalicSelected] = useState(false);
 
+	const editorRef = useRef<Editor>(null);
+
 	const editorStateRef = useRef(editorState);
 	editorStateRef.current = editorState; // update every render
 
@@ -63,19 +64,85 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 		};
 	}, []);
 
+	/**
+	 * Plain-text length of a state. Blocks are joined with a newline so the
+	 * count matches the text that is actually stored — joining with "" used to
+	 * undercount every paragraph break.
+	 */
+	const plainLength = (state: EditorState) =>
+		state.getCurrentContent().getPlainText("\n").length;
+
+	/**
+	 * One toast, reused. Sonner replaces a toast that shares an id instead of
+	 * stacking a new one, and the timestamp stops it re-firing on every
+	 * keystroke once the editor is full.
+	 */
+	const lastWarnedAt = useRef(0);
+	const warnFull = () => {
+		const now = Date.now();
+		if (now - lastWarnedAt.current < 1500) return;
+		lastWarnedAt.current = now;
+		toast.warning(`Maximum ${MAX_CHARS} characters`, {
+			id: "description-char-limit",
+		});
+	};
+
 	const handleChange = (state: EditorState) => {
-		const contentLength = state.getCurrentContent().getPlainText("").length;
-		if (contentLength > MAX_CHARS) {
-			toast("Máximo 1400 caracteres", {
-				description: "",
-				action: {
-					label: "Understood",
-					onClick: () => console.log("Understood"),
-				},
-			});
-			return; // don’t update state
+		if (plainLength(state) > MAX_CHARS) {
+			// Draft routes selection changes, undo and style toggles through this
+			// same callback, so rejecting the state outright used to freeze the
+			// editor rather than just refusing the extra characters. Keep the new
+			// selection, keep the old content.
+			warnFull();
+			setEditorState(
+				EditorState.acceptSelection(
+					editorStateRef.current,
+					state.getSelection(),
+				),
+			);
+			return;
 		}
 		setEditorState(state);
+	};
+
+	/**
+	 * Paste used to be all-or-nothing: with 400 characters left, pasting 600
+	 * exceeded the limit so the *whole* paste was dropped and the editor claimed
+	 * to be full while it still had room. Now it takes as much as fits.
+	 */
+	const handlePastedText = (text: string, _html: string | undefined, state: EditorState) => {
+		const selection = state.getSelection();
+		const selected = selection.isCollapsed()
+			? 0
+			: plainLength(state) - plainLength(
+					EditorState.push(
+						state,
+						Modifier.removeRange(
+							state.getCurrentContent(),
+							selection,
+							"backward",
+						),
+						"remove-range",
+					),
+			  );
+		const room = MAX_CHARS - plainLength(state) + selected;
+		if (room <= 0) {
+			warnFull();
+			return "handled" as const;
+		}
+
+		const slice = text.slice(0, room);
+		if (slice.length < text.length) warnFull();
+
+		const newContent = Modifier.replaceText(
+			state.getCurrentContent(),
+			selection,
+			slice,
+		);
+		setEditorState(
+			EditorState.push(state, newContent, "insert-characters"),
+		);
+		return "handled" as const;
 	};
 
 	const handleKeyCommand = (command: string, state: EditorState) => {
@@ -103,7 +170,7 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 		handleChange(newEditorState);
 	};
 
-	const used = editorState.getCurrentContent().getPlainText("").length;
+	const used = plainLength(editorState);
 	const remaining = MAX_CHARS - used;
 
 	return (
@@ -160,11 +227,24 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 			</div>
 
 			{/* Editor */}
-			<div className="min-h-[320px] w-full rounded-xl border border-zinc-200 bg-white p-5 text-[15px] leading-relaxed text-zinc-800 transition-colors focus-within:border-emerald-500/50 focus-within:ring-4 focus-within:ring-emerald-500/10 sm:min-h-[400px] sm:p-7">
+			<div
+				onMouseDown={(e) => {
+					// Draft only focuses when the contenteditable itself is hit, so
+					// clicking the padding around it did nothing — you had to land on
+					// the placeholder text. Route clicks on the box to the editor.
+					if (e.target === e.currentTarget) {
+						e.preventDefault();
+						editorRef.current?.focus();
+					}
+				}}
+				className="min-h-[320px] w-full cursor-text rounded-xl border border-zinc-200 bg-white p-5 text-[15px] leading-relaxed text-zinc-800 transition-colors focus-within:border-zinc-400 focus-within:ring-4 focus-within:ring-zinc-900/5 sm:min-h-[400px] sm:p-7"
+			>
 				<Editor
+					ref={editorRef}
 					editorState={editorState}
 					onChange={handleChange}
 					handleKeyCommand={handleKeyCommand}
+					handlePastedText={handlePastedText}
 					placeholder="Start typing…"
 				/>
 			</div>
@@ -179,7 +259,6 @@ const DraftEditor = ({ data, childSaveOnUnmount }: DraftEditorProps) => {
 				</span>
 			</div>
 
-			<Toaster />
 		</div>
 	);
 };

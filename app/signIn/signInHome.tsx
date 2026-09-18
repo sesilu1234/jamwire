@@ -3,6 +3,7 @@ import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { BRAND } from '@/lib/brand';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function SignIn() {
   const searchParams = useSearchParams();
@@ -18,8 +19,10 @@ export default function SignIn() {
       <div className="max-w-screen-xl mx-auto px-6 py-12">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end gap-2 mb-20">
-          <h1 className="font-bold text-4xl tracking-tight">{BRAND.nameLower}</h1>
+        <div className="flex flex-col md:flex-row md:items-end gap-3 mb-20">
+          <Link href="/" aria-label={BRAND.name} className="inline-block">
+            <BrandLogo className="h-9 w-auto object-contain" />
+          </Link>
           <p className="text-xs pb-1 text-gray-600 font-semibold uppercase tracking-wider">
             {BRAND.tagline}
           </p>
@@ -31,6 +34,10 @@ export default function SignIn() {
             <h2 className="font-extrabold text-4xl md:text-6xl tracking-tighter">
               WELCOME TO {BRAND.nameUpper}
             </h2>
+            <p className="mt-4 text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
+              Browsing is free and always will be. An account is only for adding
+              a jam to the map, commenting, upvoting and reporting wrong details.
+            </p>
           </div>
 
           {/* Divider - using max-w instead of fixed pixels */}
@@ -105,6 +112,15 @@ export default function SignIn() {
             </svg>
             Continue with Google
           </button>
+
+          <p className="mt-6 max-w-xs text-center text-xs leading-relaxed text-gray-500">
+            We only use your email to sign you in. We don&apos;t sell it and we
+            don&apos;t send marketing —{' '}
+            <Link href="/privacy" className="underline hover:text-black">
+              privacy policy
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </div>

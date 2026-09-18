@@ -1,7 +1,6 @@
 import { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { PlaceDescriptionProps } from "./types/types";
 
 import dynamic from "next/dynamic";
@@ -20,7 +19,6 @@ export default function PlaceDescription({
 
 	return (
 		<Card>
-			<Toaster />
 			<CardTitle
 				title="Description"
 				hint="What happens on the night, who it's for, house rules — keep it warm and short."

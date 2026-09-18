@@ -1,4 +1,4 @@
-import JamCardShadcn from './CardJam';
+import JamCardShadcn from '@/components/map/CardJam';
 import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { JamCard } from '@/types/jam';
