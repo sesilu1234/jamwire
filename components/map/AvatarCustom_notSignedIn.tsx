@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import { Menu, User } from "lucide-react";
+import { LogIn, Mail, Menu, User } from "lucide-react";
 
 import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -64,6 +64,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 import { contactSchema } from '@/lib/contact';
+
 
 
 
@@ -143,14 +144,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
-					className="w-56 z-[500]"
+					className="w-56 z-[500] bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
 					align="end"
 					sideOffset={8}
 				>
 					<DropdownMenuLabel>Account</DropdownMenuLabel>
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link href="/signIn">Sign in</Link>
+							<Link href="/signIn">
+								<LogIn />
+								Sign in
+							</Link>
 						</DropdownMenuItem>
 
 					</DropdownMenuGroup>
@@ -164,64 +168,78 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 							<AccordionLanguage />
 						</div>
 						<DropdownMenuItem onSelect={() => setShowShareDialog(true)}>
+							<Mail />
 							Contact
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-[425px] z-[1000] text-black">
-            {/* Wrap contents in a form */}
-            <form onSubmit={handleSubmit}>
-                <DialogHeader>
-                    <DialogTitle>Contact the Developer</DialogTitle>
-                    <DialogDescription>
-                        Send a message if you have questions or feedback about this website.
-                    </DialogDescription>
-                </DialogHeader>
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="z-[1000] border border-tone-0/15 bg-surface-raised text-tone-0 sm:max-w-[440px]">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>Contact the developer</DialogTitle>
+              <DialogDescription className="text-tone-0/60">
+                Questions, feedback, or something wrong on the map.
+              </DialogDescription>
+            </DialogHeader>
 
-                <FieldGroup className="py-3">
-                    <Field>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="shadcn@vercel.com"
-                            autoComplete="off"
-                            required
-                        />
-                    </Field>
-                    <Field>
-                        <Label htmlFor="message">Message</Label>
-                        <Textarea
-                            id="message"
-                            name="message"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Any questions or feedback"
-                            required
-                        />
-                    </Field>
-                </FieldGroup>
+            <FieldGroup className="gap-5 py-5">
+              <Field>
+                <Label htmlFor="contact-email" className="text-tone-0/80">
+                  Email
+                </Label>
+                <Input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="border-tone-0/15 bg-surface-inset text-tone-0 placeholder:text-tone-0/35"
+                  required
+                />
+              </Field>
 
-                <DialogFooter className="gap-4">
-                    <DialogClose asChild>
-                        <Button type="button" variant="outline" className="border-2 border-black hover:opacity-60 hover:text-black">
-                            Cancel
-                        </Button>
-                    </DialogClose>
-                    {/* This button triggers the form's onSubmit */}
-                    <Button type="submit" disabled={isSending} className="border-2 border-red">
-                        Send
-                    </Button>
-                </DialogFooter>
-            </form>
+              <Field>
+                <Label htmlFor="contact-message" className="text-tone-0/80">
+                  Message
+                </Label>
+                <Textarea
+                  id="contact-message"
+                  name="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tell us what happened."
+                  className="min-h-28 resize-none border-tone-0/15 bg-surface-inset text-tone-0 placeholder:text-tone-0/35"
+                  required
+                />
+              </Field>
+            </FieldGroup>
+
+            <DialogFooter className="gap-2">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant={null}
+                  className="bg-tone-0/10 text-tone-0/70 hover:bg-tone-0/15 hover:text-tone-0"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                disabled={isSending}
+                className="bg-brand px-6 font-semibold text-brand-ink hover:bg-brand/85 hover:text-brand-ink disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSending ? 'Sending' : 'Send'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
-    </Dialog>
+      </Dialog>
 		</div>
 	);
 }

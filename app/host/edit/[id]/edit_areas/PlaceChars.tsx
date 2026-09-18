@@ -1,4 +1,5 @@
 'use client';
+import { Drum, Guitar, ListMusic } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { PlaceCharsProps } from './types/types';
 import { useFormStore } from '../store/formStore';
@@ -180,15 +181,35 @@ export default function PlaceChars({ data, childSaveOnUnmount }: PlaceCharsProps
         />
         <div className="flex flex-col divide-y divide-zinc-100">
           {[
-            { label: 'Is there a setlist?', state: song_list, setter: setSongList },
-            { label: 'Instruments available?', state: instruments_lend, setter: setIntrumentsLend },
-            { label: 'Is there a drum kit?', state: drums, setter: setDrums },
+            {
+              label: 'Is there a setlist?',
+              Icon: ListMusic,
+              state: song_list,
+              setter: setSongList,
+            },
+            {
+              label: 'Instruments available?',
+              Icon: Guitar,
+              state: instruments_lend,
+              setter: setIntrumentsLend,
+            },
+            {
+              label: 'Is there a drum kit?',
+              Icon: Drum,
+              state: drums,
+              setter: setDrums,
+            },
           ].map((item, idx) => (
             <div
               key={idx}
               className="flex flex-wrap items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
             >
-              <span className="text-[14px] font-medium tracking-tight text-zinc-800">
+              <span className="flex items-center gap-2.5 text-[14px] font-medium tracking-tight text-zinc-800">
+                <item.Icon
+                  className="size-4 shrink-0 text-zinc-400"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
                 {item.label}
               </span>
               <div className="inline-flex gap-1 rounded-xl bg-zinc-100 p-1">

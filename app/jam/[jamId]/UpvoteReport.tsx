@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThumbsUp, Flag } from 'lucide-react';
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
 import { useSession } from 'next-auth/react';
 
 import {
@@ -196,26 +195,26 @@ export default function UpvoteReport({ jamId }: UpvoteReportProps) {
 
       {/* Report Dialog */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-neutral-100 border-1 border-stone-800 text-black">
+        <DialogContent className="sm:max-w-[425px] border border-tone-0/15 bg-surface-raised text-tone-0">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
               Report Jam Session
             </DialogTitle>
-            <DialogDescription className="text-black/60">
+            <DialogDescription className="text-tone-0/60">
               Help us maintain the map. What is wrong with this jam?
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-black/70 pl-1">
+              <label className="pl-1 text-sm font-medium text-tone-0/70">
                 Reason
               </label>
               <Select onValueChange={setReason} value={reason}>
-                <SelectTrigger className="bg-neutral-100 border-slate-700 text-black/70">
+                <SelectTrigger className="border-tone-0/15 bg-surface-inset text-tone-0">
                   <SelectValue placeholder="Why are you reporting?" />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-100 border-slate-700 text-black/70">
+                <SelectContent className="border-tone-0/15 bg-surface-raised text-tone-0">
                   <SelectItem value="closed">
                     Jam is closed / doesn´t exist
                   </SelectItem>
@@ -231,12 +230,12 @@ export default function UpvoteReport({ jamId }: UpvoteReportProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-black/70 pl-1">
+              <label className="pl-1 text-sm font-medium text-tone-0/70">
                 Extra Details
               </label>
               <Textarea
                 placeholder="Optional description..."
-                className="bg-neutral-100/40 border-1 border-slate-700/40 text-black/70 resize-none h-24"
+                className="h-24 resize-none border border-tone-0/15 bg-surface-inset text-tone-0 placeholder:text-tone-0/40"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -247,21 +246,20 @@ export default function UpvoteReport({ jamId }: UpvoteReportProps) {
             <Button
               variant={null}
               onClick={() => setReportOpen(false)}
-              className="bg-black/20 text-black text-black/60 hover:text-black/90 "
+              className="bg-tone-0/10 text-tone-0/70 hover:bg-tone-0/15 hover:text-tone-0"
             >
               Cancel
             </Button>
             <Button
               onClick={handleReportSubmit}
               disabled={isSubmitting || !reason}
-              className="bg-red-600 hover:bg-red-700 text-white  px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-danger px-6 text-white hover:bg-danger/85 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? 'Sending...' : 'Submit Report'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Toaster />
     </div>
   );
 }

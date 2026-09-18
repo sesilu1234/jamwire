@@ -18,11 +18,14 @@ import { JamCard, UserLocation } from '@/types/jam';
 import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
 import SiteFooter from '@/components/SiteFooter';
+import NewJams from '@/components/home/NewJams';
+import type { RecentJam } from '@/lib/getRecentJams';
 
 interface HomeComponentProps {
   cards: JamCard[];
   userLocation: UserLocation;
   currentUsedPath: string;
+  recentJams: RecentJam[];
 }
 
 const MapRender = dynamic(() => import('@/components/map/MapRender'), { ssr: false });
@@ -31,6 +34,7 @@ export default function HomeComponent({
   cards,
   userLocation,
   currentUsedPath,
+  recentJams,
 }: HomeComponentProps) {
   const [jams, setJams] = useState(cards);
   const [loading, setLoading] = useState(false);
@@ -109,52 +113,46 @@ export default function HomeComponent({
         </div>
       </MapProvider>
 
-      <div className="hidden md:block w-full mt-12 pt-4 pb-4">
-        <div className="max-w-[90%] w-[1300px] mx-auto p-6 grid grid-cols-2 gap-12">
-          <div className="flex flex-col gap-2 border-t-2 border-primary-1 pt-8">
-            <h3 className="text-lg font-semibold">WHAT IS A JAM SESSION?</h3>
-            <p className="text-sm leading-relaxed">
-              A jam session is a gathering where musicians hop on stage to play
-              together, improvising and sharing music in the moment. You don’t
-              need to know anyone beforehand—every night sounds different.
-              Anyone can join in—or just hang out, feel the music, and have a
-              good time.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2 text-sm leading-relaxed border-t-2 border-primary-1 pt-8">
-            <p>
-              <span className="font-semibold">
-                Can I play if it’s my first time?
-              </span>{' '}
-              → Absolutely! Anyone can get on stage to play or sing.
-            </p>
-
-            <p>
-              <span className="font-semibold">
-                Do I need to bring an instrument?
-              </span>{' '}
-              → Usually there’s a backline (drums, amp, mic), but bring yours if
-              you want.
-            </p>
-
-            <p>
-              <span className="font-semibold">Is there an entry fee?</span> →
-              Most sessions are free or require just a minimum drink.
-            </p>
-
-            <p>
-              <span className="font-semibold">
-                What if I don’t play anything?
-              </span>{' '}
-              → You’re welcome too! Come to listen, relax, and soak up the vibe.
-            </p>
-          </div>
-        </div>
+      {/* Same order as the main map page: city links and fresh jams first,
+          explainer last. Desktop only — the phone layout is a full-bleed map
+          with a tab bar. `hidden` is CSS, not removal, so it stays crawlable. */}
+      <div className="hidden md:block">
+        <CitiesSection />
       </div>
 
       <div className="hidden md:block">
-        <CitiesSection />
+        <NewJams jams={recentJams} />
+      </div>
+
+      {/* Short on purpose — the full Q&A lives at /help. */}
+      <div className="hidden w-full py-10 md:block">
+        <div className="mx-auto w-[1300px] max-w-[90%] px-6">
+          <div className="grid grid-cols-2 gap-12">
+            <div className="flex flex-col gap-2 border-t-2 border-primary-1 pt-8">
+              <h3 className="text-lg font-semibold">WHAT IS A JAM SESSION?</h3>
+              <p className="text-sm leading-relaxed">
+                A gathering where musicians get on stage and play together,
+                improvising in the moment. You don&apos;t need to know anyone
+                beforehand, and every night sounds different. Anyone can join
+                in — or just hang out, listen, and have a good time.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t-2 border-primary-1 pt-8 text-sm leading-relaxed">
+              <p>
+                First time? You can play, sing, or just watch. There is usually
+                a backline — drums, an amp, a mic — and most sessions are free
+                or ask for a drink.
+              </p>
+              <Link
+                href="/help"
+                className="font-semibold text-primary-1 hover:underline"
+              >
+                Read the full FAQ →
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       <SiteFooter className="hidden md:block" />

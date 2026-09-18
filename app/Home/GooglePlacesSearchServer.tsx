@@ -99,7 +99,7 @@ const inputRef = useRef<HTMLInputElement>(null);
         }}
         onFocus={() => googleSearchLocation && googleSearchLocation.length > 1 && setIsOpen(true)}
         placeholder="Search a city..."
-        className="w-full h-12 pl-10 pr-10 text-sm bg-tone-4/60 text-tone-1 placeholder:text-tone-1/60 border border-tone-3 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full h-12 pl-10 pr-10 text-sm bg-tone-4/60 text-tone-1 placeholder:text-tone-1/60 border border-tone-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
       />
 
       {googleSearchLocation && (

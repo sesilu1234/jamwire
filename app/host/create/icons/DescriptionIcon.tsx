@@ -7,7 +7,7 @@ export default function DescriptionIcon({
 		<svg
 			width={width}
 			height={height}
-			viewBox="0 0 42 42"
+			viewBox="-11.46 -4.38 42 42"
 			fill={fill}
 			xmlns="http://www.w3.org/2000/svg"
 		>

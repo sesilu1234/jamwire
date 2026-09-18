@@ -1,5 +1,6 @@
 import { headers, cookies } from 'next/headers';
 import { getHomeCards } from '@/lib/getHomeCards';
+import { getRecentJams } from '@/lib/getRecentJams';
 import HomeComponent from './HomeComponent'; 
 import { JamCard } from '@/types/jam';
 import { Metadata } from 'next';
@@ -147,6 +148,9 @@ export default async function CityPage({ params }: { params: Promise<{ locationS
     })),
   };
 
+
+  // Independent of the map query, so a slow or empty result never blocks it.
+  const recentJams = await getRecentJams();
   return (
     <>
       <script
@@ -157,6 +161,7 @@ export default async function CityPage({ params }: { params: Promise<{ locationS
         cards={(homeCards || []) as JamCard[]}
         userLocation={userLocation}
         currentUsedPath={locationSlug}
+        recentJams={recentJams}
       />
     </>
   );

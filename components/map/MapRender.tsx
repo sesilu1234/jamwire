@@ -13,10 +13,15 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
+import { Figtree } from "next/font/google";
 import { MIN_DISTANCE_KM, MAX_DISTANCE_KM } from "./Filtro";
 import { useMapContext } from '@/components/map/MapContext';
 import MapMarkersCluster from "./MarkerCluster";
 import MapTileSwitcher from "./MapTileSwitcher";
+
+// Figtree at 600. The global Oswald is condensed — it reads as a headline face
+// and sits awkwardly in a small control.
+const figtree = Figtree({ subsets: ["latin"], weight: ["600"] });
 
 // Fix default marker icons in TypeScript
 const DefaultIcon = L.icon({
@@ -127,19 +132,27 @@ function SearchThisArea() {
 	};
 
 	return (
-		<button
-			type="button"
-			onClick={searchHere}
-			className="absolute top-3 left-1/2 z-[500] inline-flex h-10 -translate-x-1/2
-			           cursor-pointer items-center gap-2 rounded-full border
-			           border-tone-0/15 bg-surface-raised px-4 text-sm font-semibold
-			           text-tone-0 shadow-lg transition-colors hover:bg-tone-0/8
-			           focus-visible:ring-2 focus-visible:ring-tone-0/25
-			           focus-visible:outline-none"
-		>
-			<Search className="size-4 shrink-0" />
-			Search this area
-		</button>
+		<div className="pointer-events-none absolute inset-x-0 top-3 z-[500] flex justify-center">
+			<button
+				type="button"
+				onClick={searchHere}
+				className={`${figtree.className} pointer-events-auto inline-flex h-10
+				           cursor-pointer items-center gap-2 rounded-md border
+				           border-[#2A2F3A] bg-white/92 px-4 text-sm font-semibold
+				           tracking-tight text-[#1B1F2A] backdrop-blur-sm
+				           shadow-[2px_2px_0_0_rgba(27,31,42,0.55)]
+				           transition-[transform,box-shadow,background-color] duration-150
+				           hover:bg-white hover:shadow-[3px_3px_0_0_rgba(27,31,42,0.65)]
+				           active:translate-x-px active:translate-y-px
+				           active:shadow-[1px_1px_0_0_rgba(27,31,42,0.55)]
+				           focus-visible:outline-none focus-visible:ring-2
+				           focus-visible:ring-brand
+				           animate-in fade-in slide-in-from-top-2 duration-200`}
+			>
+				<Search className="size-4 shrink-0" strokeWidth={2.5} />
+				Search this area
+			</button>
+		</div>
 	);
 }
 

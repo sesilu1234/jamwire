@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/brand';
 import React, { useRef } from 'react';
 import EditSections_desktop from './EditSections_desktop';
 import EditSections_phone from './EditSections_phone';
@@ -102,8 +103,11 @@ export default function Home() {
 
           {/* Wordmark + context */}
           <div className="mt-5 hidden lg:block">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400">
-              jamspots
+            {/* The wordmark reads from lib/brand.ts so a rename can't leave a
+                stale name behind here again. Set in normal case rather than the
+                wide-tracked uppercase eyebrow it was. */}
+            <p className="text-[13px] font-medium text-amber-400/90">
+              {BRAND.name}
             </p>
             <h1 className="mt-1.5 text-[26px] font-bold leading-tight tracking-tight text-white">
               New jam

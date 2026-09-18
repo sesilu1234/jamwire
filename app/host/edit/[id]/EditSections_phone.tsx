@@ -1,4 +1,5 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -49,8 +50,8 @@ export default function EditSections_phone({
     <div className="pb-4">
       <div className="flex items-baseline justify-between px-6 pb-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-400">
-            jamspots
+          <p className="text-[12px] font-medium text-amber-400/90">
+            {BRAND.name}
           </p>
           <h1 className="mt-0.5 text-xl font-bold leading-none tracking-tight text-white">
             Edit jam
