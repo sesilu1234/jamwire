@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Guitar, Beer, MapPin } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
+import SiteFooter from '@/components/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -11,17 +13,17 @@ export const metadata: Metadata = {
 /** Three-beat pitch. Kept short on purpose — the map is the product. */
 const BEATS = [
   {
-    emoji: '🎸',
+    icon: Guitar,
     title: 'Play',
     body: 'Bring your instrument, get on the list, take a solo. No audition, no band required.',
   },
   {
-    emoji: '🍻',
+    icon: Beer,
     title: 'Watch',
     body: 'Or just show up, order something, and let the night happen around you.',
   },
   {
-    emoji: '📍',
+    icon: MapPin,
     title: 'Host',
     body: 'Run a jam or an open mic? Put it on the map so people can actually find it.',
   },
@@ -29,68 +31,48 @@ const BEATS = [
 
 export default function About() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-tone-5 text-tone-0">
-      {/* Warm glow behind the fold — the logo's amber, very diffuse. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] opacity-60"
-        style={{
-          background:
-            'radial-gradient(60% 70% at 50% 0%, oklch(78% 0.16 75 / 0.35) 0%, transparent 70%)',
-        }}
-      />
-
-      <div className="relative mx-auto w-full max-w-3xl px-6 py-10 lg:py-16">
-        <Link href="/" className="inline-block">
-          <BrandLogo className="h-12 w-auto object-contain" />
+    <div className="flex min-h-screen flex-col bg-tone-5 text-tone-0">
+      <div className="mx-auto w-full max-w-xl flex-1 px-6 py-12">
+        <Link href="/" className="inline-block" aria-label={BRAND.name}>
+          <BrandLogo className="h-9 w-auto object-contain" />
         </Link>
 
-        <h1 className="mt-14 text-4xl leading-tight font-semibold text-balance lg:text-5xl">
-          Music happens somewhere tonight.
-          <br />
-          <span style={{ color: 'oklch(78% 0.16 75)' }}>This is where.</span>
-        </h1>
+        <h1 className="mt-16 text-2xl font-medium">About</h1>
 
-        <p className="mt-6 max-w-xl text-lg text-tone-0/70">
-          {BRAND.name} is a live map of jam sessions and open mics — the
+        <p className="mt-2 text-sm text-tone-0/60">
+          {BRAND.name} is a live map of jam sessions and open mics. The
           recurring, unticketed, show-up-and-play kind. The ones that are
           usually only findable if someone already told you about them.
         </p>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-3">
+        <dl className="mt-10 space-y-6 border-t border-tone-0/10 pt-10">
           {BEATS.map((beat) => (
-            <div
-              key={beat.title}
-              className="rounded-2xl border border-tone-0/10 bg-tone-6/40 p-5 transition-colors hover:border-tone-0/25"
-            >
-              <span className="text-2xl" aria-hidden>
-                {beat.emoji}
-              </span>
-              <p className="mt-3 font-semibold">{beat.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-tone-0/65">
-                {beat.body}
-              </p>
+            <div key={beat.title} className="flex gap-4">
+              <beat.icon
+                className="mt-0.5 size-4 shrink-0 text-tone-0/40"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+              <div>
+                <dt className="text-sm font-medium">{beat.title}</dt>
+                <dd className="mt-1 text-sm leading-relaxed text-tone-0/60">
+                  {beat.body}
+                </dd>
+              </div>
             </div>
           ))}
-        </div>
+        </dl>
 
-        <div className="mt-14 flex flex-wrap items-center gap-3">
-          <Link
-            href="/"
-            className="rounded-full px-6 py-3 font-semibold text-tone-6 transition-transform hover:scale-[1.03]"
-            style={{ backgroundColor: 'oklch(78% 0.16 75)' }}
-          >
+        <div className="mt-10 flex gap-6 border-t border-tone-0/10 pt-10 text-sm">
+          <Link href="/" className="underline hover:text-tone-0/70">
             Open the map
           </Link>
-          <Link
-            href="/host"
-            className="rounded-full border border-tone-0/20 px-6 py-3 font-semibold transition-colors hover:border-tone-0/40"
-          >
+          <Link href="/host" className="underline hover:text-tone-0/70">
             Add a jam
           </Link>
         </div>
 
-        <p className="mt-16 border-t border-tone-0/10 pt-6 text-sm text-tone-0/50">
+        <p className="mt-10 text-sm text-tone-0/50">
           Built by one person who got tired of hearing about a great jam the
           morning after.{' '}
           <Link href="/contact" className="underline hover:text-tone-0/80">
@@ -103,6 +85,8 @@ export default function About() {
           .
         </p>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

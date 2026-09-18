@@ -87,6 +87,16 @@
   --color-modality-open-mic: var(--text-tone-modality-open-mic);
   /* Vibrant Emerald */
 
+  /* The logo's amber. Deliberately NOT per-theme: the wordmark is the same
+     colour on every theme, so the accent that matches it has to be too.
+     `brand-ink` is the only text colour that stays readable on top of it. */
+  --color-brand: oklch(78% 0.16 75);
+  --color-brand-ink: oklch(22% 0.03 75);
+
+  /* Elevation surfaces — see the per-theme definitions below. */
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-inset: var(--surface-inset);
+
   --color-primary-1: var(--primary-1);
   --color-secondary-1: var(--secondary-1);
   --color-danger: var(--danger);
@@ -161,6 +171,13 @@
   --warning: oklch(65% 0.16 95);
   --success: oklch(58% 0.16 160);
   --info: oklch(52% 0.12 265);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(99.5% 0.001 106.423);
+  --surface-inset: oklch(96.5% 0.002 48.717);
 }
 
 .slate {
@@ -219,6 +236,13 @@
   --warning: oklch(68% 0.14 95);
   --success: oklch(60% 0.14 160);
   --info: oklch(55% 0.12 255);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(31% 0.009 219);
+  --surface-inset: oklch(20% 0.007 218);
 }
 
 .tangerine {
@@ -277,6 +301,13 @@
   --warning: oklch(70% 0.12 70);
   --success: oklch(60% 0.14 145);
   --info: oklch(55% 0.1 255);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(31% 0.016 57);
+  --surface-inset: oklch(20% 0.011 53);
 }
 
 .ocean {
@@ -335,6 +366,13 @@
   --warning: oklch(72% 0.16 95);
   --success: oklch(68% 0.17 165);
   --info: oklch(60% 0.14 255);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(27% 0.042 242);
+  --surface-inset: oklch(17% 0.028 246);
 }
 
 .dark {
@@ -400,6 +438,13 @@
   --warning: oklch(72% 0.16 95);
   --success: oklch(68% 0.16 160);
   --info: oklch(60% 0.12 265);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(31% 0.009 219);
+  --surface-inset: oklch(20% 0.007 218);
 }
 
 .forest {
@@ -458,6 +503,13 @@
   --warning: oklch(72% 0.17 95);
   --success: oklch(68% 0.18 145);
   --info: oklch(60% 0.1 210);
+
+  /* Elevation. `raised` is a panel lifted off the page, `inset` is a
+     control recessed into that panel. Defined per theme because the
+     direction flips: light themes raise towards white, dark themes
+     raise towards grey while the page stays put. */
+  --surface-raised: oklch(27% 0.032 142);
+  --surface-inset: oklch(17% 0.018 147);
 }
 
 @layer base {

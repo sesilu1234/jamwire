@@ -1,118 +1,237 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { useState, useRef  } from 'react';
+import { useId, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
-import { useRouter } from 'next/navigation'; 
 import { z } from 'zod';
-import { BRAND } from '@/lib/brand';
+import { ArrowRight, Check } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import BrandLogo from '@/components/BrandLogo';
-const MAX_MESSAGE_LENGTH = 500;
+import SiteFooter from '@/components/SiteFooter';
+import { BRAND } from '@/lib/brand';
 
+/**
+ * Must stay <= the cap in app/api/public/users-suggestions/route.ts. The route
+ * rejects a longer message with a 400, so a higher number here would let people
+ * write past the limit and only find out after pressing Submit.
+ */
+const MAX_MESSAGE_LENGTH = 150;
 
-
-export default function Contact() {
-
-  const router = useRouter();
-
-
-  const [msg, setMsg] = useState('');
-  const [email, setEmail] = useState('');
-
-    const sentRef = useRef(false);
-
-
-
-
-  
+/**
+ * Field styling is written out here rather than left to the shadcn defaults.
+ * The stock Input/Textarea colour themselves with `--input` and
+ * `--muted-foreground`, and globals.css defines both as near-white in EVERY
+ * theme block including `.dark` — only the tone-* scale is actually themed.
+ * The result on a dark page is a white box with grey text in it.
+ *
+ * Elevation comes from `surface-raised` / `surface-inset` rather than a step on
+ * the tone scale, because tone-5 is the page on every theme and a panel painted
+ * in tone-6 ends up DARKER than the page on all five dark palettes — which is
+ * what made this form look like a hole. Each theme sets its own pair in
+ * globals.css, so this works on ocean and tangerine as well as `.dark`.
+ */
+const FIELD_CLASS =
+  'bg-surface-inset text-tone-0 placeholder:text-tone-0/35 ' +
+  'border border-tone-0/10 shadow-none transition-colors ' +
+  'hover:border-tone-0/20 ' +
+  'focus-visible:border-brand focus-visible:ring-brand/25 focus-visible:ring-[3px] ' +
+  'aria-invalid:border-danger aria-invalid:ring-danger/20';
 
 const contactSchema = z.object({
-  email: z
-    .email('Invalid email format')
-    .max(254),
+  email: z.email('That email address looks off').max(254),
   msg: z
     .string()
     .trim()
-    .min(1, 'Message is required')
-    .max(MAX_MESSAGE_LENGTH, `Message must be under ${MAX_MESSAGE_LENGTH} characters`),
+    .min(1, 'Write a message first')
+    .max(
+      MAX_MESSAGE_LENGTH,
+      `Message must be under ${MAX_MESSAGE_LENGTH} characters`,
+    ),
 });
 
+type FieldErrors = { email?: string; msg?: string };
 
- const sendData = async () => {
-  if (sentRef.current) return;
+export default function Contact() {
+  const router = useRouter();
+  const emailId = useId();
+  const msgId = useId();
 
-  const result = contactSchema.safeParse({ email, msg });
+  const [email, setEmail] = useState('');
+  const [msg, setMsg] = useState('');
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  if (!result.success) {
-    toast.error(result.error.issues[0].message);
-    return;
-  }
+  const remaining = MAX_MESSAGE_LENGTH - msg.length;
 
-  sentRef.current = true;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isSending || sent) return;
 
-  await fetch('/api/public/users-suggestions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(result.data),
-  });
+    const result = contactSchema.safeParse({ email, msg });
+    if (!result.success) {
+      // Validation lands under the field it belongs to; toasts are kept for
+      // things the user can't see inline (network, server).
+      const flat = z.flattenError(result.error).fieldErrors;
+      setErrors({ email: flat.email?.[0], msg: flat.msg?.[0] });
+      return;
+    }
+    setErrors({});
 
-  toast.success('Report sent', {
-    description: 'Thank you for helping the community stay updated.',
-  });
+    setIsSending(true);
+    try {
+      const res = await fetch('/api/public/users-suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result.data),
+      });
 
-  setTimeout(() => {
-  router.push('/');
-}, 3000); // 2 seconds feels natural
-};
+      // The old version assumed success and redirected even on a 400/500, so a
+      // rejected message looked sent. Check the status and let people retry.
+      if (!res.ok) {
+        toast.error("That didn't go through", {
+          description: 'Try again in a moment.',
+        });
+        return;
+      }
+
+      setSent(true);
+      toast.success('Message sent');
+      setTimeout(() => router.push('/'), 2000);
+    } catch {
+      toast.error("Couldn't reach the server", {
+        description: 'Check your connection and try again.',
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
-    <div className="w-[1300px] max-w-[90%] mx-auto p-6">
-      <div className="inline-block w-full">
-        <Link href="/" className='flex justify-center'>
-          <div className="ml-0 flex gap-2 items-end">
-            <BrandLogo className="max-h-16 max-w-75 w-auto h-auto object-contain" />
-           <p className="hidden [@media(min-width:385px)]:block text-xs py-3 text-gray-600 font-semibold">
-              {BRAND.tagline}
-            </p>
-          </div>
+    <div className="flex min-h-screen flex-col bg-tone-5 text-tone-0">
+      <div className="mx-auto w-full max-w-lg flex-1 px-6 py-12">
+        <Link href="/" className="inline-block" aria-label={BRAND.name}>
+          <BrandLogo className="h-9 w-auto object-contain" />
         </Link>
-      </div>
-      <div className="flex flex-col items-center gap-6 mt-6">
-        <div className="text-center flex-1">
-          <h1 className="text-2xl font-semibold mb-4">Contact Us</h1>
-          <p>This is the Contact page.</p>
+
+        <h1 className="mt-16 text-3xl font-medium tracking-tight">Contact</h1>
+        <p className="mt-2 text-tone-0/55">
+          A jam that&apos;s missing, details that are wrong, or something
+          broken. Send it here.
+        </p>
+
+        {/* Brand rule — the one bit of colour on the page, tying it to the
+            wordmark above without decorating anything. */}
+        <div className="mt-8 h-px w-12 bg-brand" />
+
+        {/* The panel. Lifted off the page with a long, soft shadow rather than
+            a heavy border: the elevation is what encloses the form, the
+            1px tone-0/10 edge only keeps it from bleeding into the page. */}
+        <div className="mt-8 rounded-xl border border-tone-0/10 bg-surface-raised p-6 shadow-2xl shadow-black/25 sm:p-8">
+          {sent ? (
+            <div className="flex items-start gap-3 py-6">
+              <Check className="mt-0.5 size-5 shrink-0 text-brand" />
+              <div>
+                <p className="font-medium">Message sent</p>
+                <p className="mt-1 text-sm text-tone-0/55">
+                  Thanks. Taking you back to the map.
+                </p>
+                <Link
+                  href="/"
+                  className="mt-3 inline-block text-sm text-tone-0/60 underline underline-offset-4 hover:text-tone-0"
+                >
+                  Go now
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className="space-y-7">
+              <div className="space-y-2">
+                <Label htmlFor={emailId} className="text-sm text-tone-0/80">
+                  Email
+                </Label>
+                <Input
+                  id={emailId}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email)
+                      setErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
+                  disabled={isSending}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={`${emailId}-hint`}
+                  className={`h-11 rounded-lg ${FIELD_CLASS}`}
+                />
+                <p
+                  id={`${emailId}-hint`}
+                  className={
+                    errors.email
+                      ? 'text-xs text-danger'
+                      : 'text-xs text-tone-0/45'
+                  }
+                >
+                  {errors.email ?? 'Only used to reply to you.'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <Label htmlFor={msgId} className="text-sm text-tone-0/80">
+                    Message
+                  </Label>
+                  {/* Only worth showing once it's actually a constraint. */}
+                  {remaining <= 40 && (
+                    <span
+                      className={`text-xs tabular-nums ${
+                        remaining < 0 ? 'text-danger' : 'text-tone-0/45'
+                      }`}
+                    >
+                      {remaining} left
+                    </span>
+                  )}
+                </div>
+                <Textarea
+                  id={msgId}
+                  rows={6}
+                  placeholder="Tuesday jam at The Blue Room, 9pm, house drummer."
+                  value={msg}
+                  onChange={(e) => {
+                    setMsg(e.target.value);
+                    if (errors.msg)
+                      setErrors((prev) => ({ ...prev, msg: undefined }));
+                  }}
+                  disabled={isSending}
+                  aria-invalid={!!errors.msg || remaining < 0}
+                  className={`min-h-36 resize-none rounded-lg py-3 ${FIELD_CLASS}`}
+                />
+                {errors.msg && (
+                  <p className="text-xs text-danger">{errors.msg}</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSending}
+                className="group h-11 w-full rounded-lg bg-brand font-semibold text-brand-ink hover:bg-brand/85 hover:text-brand-ink"
+              >
+                {isSending ? 'Sending' : 'Send'}
+                <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+              </Button>
+            </form>
+          )}
         </div>
-
-        <div className=" flex flex-col space-y-4 my-8 w-[80vw] max-w-144">
-          <div className="flex justify-between ">
-            <Button
-              className="self-start hover:opacity-90 hover:cursor-pointer hover:text-tone-1 hover:border-tone-0   bg-tone-3 hover:bg-tone-3/70"
-             
-              onClick={sendData}
-            >
-              Submit
-            </Button>
-          </div>
-
-          <textarea
-            className=" h-64 p-8 border bg-white text-black border-gray-400 rounded resize-none"
-            placeholder="Write your message..."
-            value={msg}
-            onChange={(e) => setMsg(e.target.value)}
-          />
-
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-6/8  px-2 py-2 rounded-sm border bg-white text-black border-gray-400 focus:ring-1 focus:ring-gray-200 outline-none text-md leading-tight"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
       </div>
-      <Toaster />
+
+      <SiteFooter />
     </div>
   );
 }
