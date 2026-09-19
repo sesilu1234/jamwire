@@ -84,21 +84,24 @@ export default function HomeComponent({
             </div>
           </div>
 
-          {/* Result counts — desktop only. */}
-          <div className="hidden md:flex justify-between items-end px-3 font-semibold uppercase tracking-wide text-xs md:text-lg">
-            {searchType === 'local' ? (
-              <span>{jams.length} jams found</span>
+          {/* Result count — desktop only.
+              Was two uppercase bold lines at md:text-lg on opposite ends of the
+              row ("9 JAMS FOUND" ... "SHOWING JAMS NEAR YOU"), which said the
+              same thing twice and shouted louder than the map. One quiet line,
+              with the number as the only emphasis. */}
+          <div className="hidden px-3 pb-1 text-sm md:block">
+            {loading ? (
+              <span className="text-tone-0/45">Searching…</span>
+            ) : searchType === 'local' ? (
+              <span className="text-tone-0/50">
+                <span className="font-semibold text-tone-0 tabular-nums">
+                  {jams.length}
+                </span>{' '}
+                {jams.length === 1 ? 'jam' : 'jams'} near you
+              </span>
             ) : (
-              <span>Showing jams worldwide</span>
+              <span className="text-tone-0/50">Showing jams worldwide</span>
             )}
-
-            <div className="flex flex-col items-end">
-              {searchType === 'local' ? (
-                <span> Showing jams near you </span>
-              ) : (
-                <span> Showing global </span>
-              )}
-            </div>
           </div>
 
           {/* Phone: viewport minus the top bar (4rem) and tab bar (4rem). */}

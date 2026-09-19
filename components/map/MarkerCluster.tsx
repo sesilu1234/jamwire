@@ -74,22 +74,21 @@ export default function MapMarkersCluster() {
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
 
-        // Example: make color based on count
-        let color = '#2563eb'; // default
-        if (count > 10) color = '#facc15'; // yellow
-        if (count > 50) color = '#dc2626'; // red
+        // Size carries the count, not colour. The old blue/yellow/red ramp
+        // implied severity — red for "lots of jams" reads as a warning — and
+        // none of the three related to the brand.
+        const size = count > 50 ? 52 : count > 10 ? 44 : 36;
 
-        // Return a divIcon with custom HTML
         return L.divIcon({
           html: `
-        <div class="custom-cluster" style="
-          background-color: ${color};
-        ">
+        <div class="custom-cluster" style="width:${size}px;height:${size}px;font-size:${
+          size > 44 ? 15 : 13
+        }px;">
           ${count}
         </div>
       `,
           className: '', // important to prevent default styles
-          iconSize: [40, 40],
+          iconSize: [size, size],
         });
       },
     });
@@ -100,11 +99,21 @@ export default function MapMarkersCluster() {
     //   clusterGroup.addLayer(marker);
     // });
 
+    // Inline SVG rather than <img src="/markerLeaf.svg">: an <img> can't be
+    // recoloured, so the `color` rule in markersStyle.css was doing nothing and
+    // the pins stayed magenta regardless of the theme.
     const markerIcon = L.divIcon({
-      html: `<img src="/markerLeaf.svg" class="marker-svg" />`,
+      html: `
+        <svg class="marker-svg" viewBox="0 0 26 36" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M13 0C5.82 0 0 5.82 0 13c0 9.2 11.2 21.3 11.68 21.8a1.8 1.8 0 0 0 2.64 0C14.8 34.3 26 22.2 26 13 26 5.82 20.18 0 13 0Z"
+            fill="#F2A93B" stroke="#1B1F2A" stroke-width="1.6"
+          />
+          <circle cx="13" cy="13" r="4.6" fill="#1B1F2A" />
+        </svg>`,
       className: '',
-      iconSize: [26, 42],
-      iconAnchor: [13, 42],
+      iconSize: [26, 36],
+      iconAnchor: [13, 36],
     });
 
     markersData.forEach((m) => {
