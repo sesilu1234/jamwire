@@ -1,20 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { TileLayer } from 'react-leaflet';
 
 /**
  * The basemap: Stadia's Alidade Bright.
  *
  * Not theme-aware on purpose — one basemap was chosen deliberately, and a map
- * that flips between light and dark under the same amber pins ends up needing
- * two sets of marker colours to stay legible.
+ * that flips between light and dark under the same amber pins would need two
+ * sets of marker colours to stay legible.
  *
- * Stadia serves keyless from localhost, so development works with no setup,
- * but a deployed site needs either NEXT_PUBLIC_STADIA_API_KEY or the domain
- * registered in the Stadia dashboard. If neither is available we fall back to
- * Esri's Light Gray Canvas, which needs no key at all — a plainer map is much
- * better than an empty one.
+ * AUTHENTICATION
+ * Stadia accepts either an API key in the URL or the requesting domain being
+ * registered in their dashboard, and it serves localhost freely either way.
+ * Domain auth is preferable here: a tile key has to travel to the browser to
+ * be usable, so NEXT_PUBLIC_STADIA_API_KEY is readable by anyone who opens
+ * devtools, and someone else could spend your quota with it. A registered
+ * domain can't be lifted the same way — a copied Referer header doesn't help
+ * an attacker serving from their own site.
+ *
+ * So the key is optional. If it isn't set we still request Stadia, which works
+ * on localhost and on any domain you've registered.
+ *
+ * If those tiles fail — no key, unregistered domain, quota exhausted, Stadia
+ * down — we switch to Esri's Light Gray Canvas, which needs no key at all. A
+ * plainer map is far better than an empty grey rectangle.
  */
 
 const STADIA_KEY = process.env.NEXT_PUBLIC_STADIA_API_KEY;
@@ -36,24 +46,31 @@ export default function MapTileSwitcher({
   /** Kept so existing call sites don't break; there is one basemap now. */
   selectedIndex?: number;
 }) {
-  // Read after mount: the server has no `location`, and guessing during render
-  // would desync hydration.
-  const [isLocal, setIsLocal] = useState(false);
-  useEffect(() => {
-    setIsLocal(['localhost', '127.0.0.1'].includes(window.location.hostname));
-  }, []);
+  const [stadiaFailed, setStadiaFailed] = useState(false);
 
-  const canUseStadia = Boolean(STADIA_KEY) || isLocal;
+  // A single failed tile is NOT enough to condemn the layer: tiles legitimately
+  // 404 over open water, past the edge of coverage, and on flaky connections.
+  // Only a run of failures with nothing loading in between means the layer is
+  // actually broken — which is what an auth or quota problem looks like, since
+  // then every single tile fails.
+  const consecutiveFailures = useRef(0);
 
-  if (canUseStadia) {
+  if (!stadiaFailed) {
     return (
       <TileLayer
-        // Remount when the source changes: Leaflet caches tiles per layer
-        // instance, so the old basemap would otherwise linger until you pan.
         key="stadia-alidade-bright"
         url={STADIA_URL}
         attribution={STADIA_ATTRIBUTION}
         maxZoom={20}
+        eventHandlers={{
+          tileerror: () => {
+            consecutiveFailures.current += 1;
+            if (consecutiveFailures.current >= 8) setStadiaFailed(true);
+          },
+          tileload: () => {
+            consecutiveFailures.current = 0;
+          },
+        }}
       />
     );
   }
