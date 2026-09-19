@@ -2,22 +2,18 @@
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_CLIENT_API_KEY!;
 
 import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
-import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
 import { Jam } from '../types/jam';
 import draftToHtml from 'draftjs-to-html';
 import { RawDraftContentState } from 'draft-js';
+
 import SocialLinks from './SocialLinks';
 import UpvoteReport from './UpvoteReport';
 import StaticMap from './LocationImageGMaps';
 import TimeAndPlace from './TimeAndPlace';
-import { JamImagesTop, JamImagesBottom } from './JamImages';
 import JamChars from './JamChars';
-import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
-
 import CommentSection from './CommentSection';
 
 import { Space_Grotesk } from 'next/font/google';
@@ -39,15 +35,7 @@ const HtmlReadOnly = ({ rawContent }: HtmlReadOnlyProps) => {
 
   return (
     <div
-      className="
-     
-    text-lg
-    leading-relaxed
-    tracking-wide
-    space-y-5
-    text-pretty
-    max-w-prose
-  "
+      className="max-w-prose space-y-5 text-lg leading-relaxed tracking-wide text-pretty"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -58,99 +46,172 @@ export type JamWithComments = Jam & {
   host_name: string;
 };
 
-// Use it in your component
+/** One measure for every section, so nothing shifts as you scroll. */
+const SHELL = 'mx-auto w-full max-w-[1200px] px-6';
+
+/** Small uppercase label above each block. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-xs font-bold tracking-[0.18em] text-tone-0/40 uppercase">
+      {children}
+    </h2>
+  );
+}
+
 export default function JamComponent({ jam }: { jam: JamWithComments }) {
   if (!jam) return null;
+
+  const isOpenMic = jam.modality === 'open_mic';
+  const accent = isOpenMic
+    ? 'var(--text-tone-modality-open-mic)'
+    : 'var(--text-tone-modality-jam)';
+
+  const hero = jam.images?.[0];
+  const gallery = (jam.images ?? []).slice(1, 5);
 
   return (
     <div
       className={`${spaceGrotesk.className} min-h-screen bg-tone-5 text-tone-0`}
     >
-      <div className=" ">
-        <header className="w-full border-b border-tone-0/10">
-          <div className="mx-auto flex w-full max-w-[1300px] items-center justify-between gap-4 px-6 py-4">
-            <Link href="/" aria-label={BRAND.name} className="shrink-0">
-              <BrandLogo className="h-8 w-auto object-contain sm:h-10" />
-            </Link>
+      {/* Sticky: a jam page is usually the first thing someone sees from a
+          shared link, so the way into the map shouldn't scroll away. */}
+      <header className="sticky top-0 z-50 w-full border-b border-tone-0/10 bg-tone-5/80 backdrop-blur-md">
+        <div className={`${SHELL} flex items-center justify-between gap-4 py-3`}>
+          <Link href="/" aria-label={BRAND.name} className="shrink-0">
+            <BrandLogo className="h-8 w-auto object-contain" />
+          </Link>
 
-            {/* A jam page is often the first thing a visitor lands on from a
-                shared link, so give them one obvious way into the map. */}
-            <Link
-              href="/"
-              className="flex shrink-0 items-center gap-2 rounded-full border border-tone-0/15 px-4 py-2 text-sm font-medium text-tone-1/90 transition-colors hover:border-tone-0/35 hover:text-tone-0"
-            >
-              <span aria-hidden>&larr;</span>
-              <span className="sm:hidden">Map</span>
-              <span className="hidden sm:inline">Explore the map</span>
-            </Link>
-          </div>
-        </header>
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-2 rounded-full border border-tone-0/15 px-4 py-2 text-sm font-medium text-tone-1/90 transition-colors hover:border-tone-0/35 hover:text-tone-0"
+          >
+            <ArrowLeft className="size-4" />
+            <span className="sm:hidden">Map</span>
+            <span className="hidden sm:inline">Explore the map</span>
+          </Link>
+        </div>
+      </header>
 
-        <div className="max-w-6xl w-[80%] mx-auto flex flex-col-reverse lg:flex-row lg:items-center gap-10 lg:gap-20 mt-10 lg:mt-14 mb-8">
-          <div className="lg:w-1/2 space-y-4 lg:text-right">
-            {/* The "Glowing" Accent Text */}
-            <span
-              className="font-black tracking-[0.25em] text-xs uppercase transition-all duration-700"
-              style={{
-                color:
-                  jam.modality === 'open_mic'
-                    ? 'var(--text-tone-modality-open-mic)'
-                    : 'var(--text-tone-modality-jam)',
-                textShadow:
-                  jam.modality === 'open_mic'
+      {/* ── Hero ───────────────────────────────────────────────────────────
+          The title used to sit in a half-width column next to a floating
+          thumbnail. A venue photo is the most persuasive thing on this page,
+          so it runs full width with the title set over it. */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative h-[52vh] max-h-140 min-h-95 w-full">
+          {hero ? (
+            <Image
+              src={hero}
+              alt={`${jam.jam_title} at ${jam.location_title}`}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-tone-4/30" />
+          )}
+
+          {/* Two scrims: vertical so the text always has a dark base, and
+              horizontal so it survives a bright photo on a wide screen. */}
+          <div className="absolute inset-0 bg-linear-to-t from-tone-5 via-tone-5/70 to-tone-5/20" />
+          <div className="absolute inset-0 bg-linear-to-r from-tone-5/80 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0">
+            <div className={`${SHELL} pb-10`}>
+              <span
+                className="text-xs font-black tracking-[0.25em] uppercase"
+                style={{
+                  color: accent,
+                  textShadow: isOpenMic
                     ? 'var(--neon-glow-mic)'
                     : 'var(--neon-glow-jam)',
-              }}
-            >
-              {jam.modality === 'open_mic' ? 'Open Mic' : 'Featured Jam'}
-            </span>
-
-            <h3 className="text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-tone-0">
-              {jam.jam_title}
-              <span className="block text-tone-2/60 text-2xl lg:text-3xl mt-2 font-medium">
-                at {jam.location_title}
+                }}
+              >
+                {isOpenMic ? 'Open Mic' : 'Jam Session'}
               </span>
-            </h3>
-          </div>
 
-          <div className="lg:w-1/2 w-full">
-            <JamImagesTop images={jam.images.slice(0, 1)} />
+              <h1 className="mt-3 max-w-4xl text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+                {jam.jam_title}
+              </h1>
+
+              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-tone-0/70 sm:text-lg">
+                <span className="font-medium">{jam.location_title}</span>
+                <span aria-hidden className="text-tone-0/30">
+                  •
+                </span>
+                <span className="font-medium">{jam.display_date}</span>
+              </p>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col-reverse lg:flex-row  gap-6 w-[1300px] max-w-[90%] lg:max-w-[75%] mx-auto pt-0 lg:pt-0 pb-12 mt-12">
-          <div className="flex flex-col   lg:w-1/2">
-            {/* Left column: JamChars */}
-            <div className="rounded-xl  pt-8 pb-10 px-8 border border-white/10 bg-tone-0/5  w-full">
-              <JamChars
-                jamDetails={{
-                  styles: jam.styles,
-                  drums: jam.drums,
-                  lista_canciones: jam.lista_canciones,
-                  instruments_lend: jam.instruments_lend,
-                }}
+      </section>
+
+      {/* ── Body ───────────────────────────────────────────────────────────
+          A narrow sticky rail rather than the old 50/50 split: the actions
+          are small, and giving them half the page starved the writing. */}
+      <div
+        className={`${SHELL} grid grid-cols-1 gap-10 pt-12 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}
+      >
+        <main className="flex min-w-0 flex-col gap-12">
+          <section>
+            <SectionLabel>About this jam</SectionLabel>
+            <div className="mt-4 text-tone-0/85">
+              <HtmlReadOnly
+                rawContent={JSON.parse(jam.description as unknown as string)}
               />
             </div>
+          </section>
 
-            <div className="flex flex-col gap-4  rounded-lg  pt-18  pb-18 px-8">
-              <h3 className="text-sm font-semibold"></h3>
-
-              <div>
-                <HtmlReadOnly
-                  rawContent={JSON.parse(jam.description as unknown as string)}
-                />
-              </div>
-            </div>
-            <StaticMap
-              address={jam.location_address}
-              fallbackLat={jam.lat}
-              fallbackLng={jam.lng}
-              apiKey={API_KEY}
+          <section className="rounded-2xl border border-tone-0/10 bg-tone-0/4 p-8">
+            <JamChars
+              jamDetails={{
+                styles: jam.styles,
+                drums: jam.drums,
+                lista_canciones: jam.lista_canciones,
+                instruments_lend: jam.instruments_lend,
+              }}
             />
-          </div>
+          </section>
 
-          {/* Right column: TimeAndPlace sticky */}
+          {gallery.length > 0 && (
+            <section>
+              <SectionLabel>Photos</SectionLabel>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {gallery.map((img, i) => (
+                  <div
+                    key={img}
+                    className={`group relative aspect-4/3 overflow-hidden rounded-xl border border-tone-0/10 ${
+                      gallery.length === 1 ? 'col-span-2' : ''
+                    }`}
+                  >
+                    <Image
+                      src={img}
+                      alt={`${jam.jam_title} photo ${i + 2}`}
+                      fill
+                      sizes="(max-width: 1024px) 50vw, 400px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-          <div className="lg:sticky top-24 rounded-xl lg:w-1/2 flex flex-col pt-8 pb-10 px-8 border border-white/10 mx-auto self-start bg-tone-0/5">
+          <section>
+            <SectionLabel>On the map</SectionLabel>
+            <div className="mt-4 overflow-hidden rounded-2xl border border-tone-0/10">
+              <StaticMap
+                address={jam.location_address}
+                fallbackLat={jam.lat}
+                fallbackLng={jam.lng}
+                apiKey={API_KEY}
+              />
+            </div>
+          </section>
+        </main>
+
+        <aside className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-2xl border border-tone-0/10 bg-tone-0/4 p-6">
             <TimeAndPlace
               location_title={jam.location_title}
               address={jam.location_address}
@@ -160,26 +221,20 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
               time={jam.display_date}
             />
           </div>
-        </div>
 
-        <div className="flex flex-col gap-12 w-[1300px] max-w-[85%]  lg:max-w-[75%] mx-auto pb-12 ">
-          <JamImagesBottom images={jam.images.slice(1, 3)} />
-        </div>
-
-        <div className="flex flex-col lg:flex-row w-[1300px] max-w-[85%]  lg:max-w-[75%] mx-auto pb-12 lg:pb-24 overflow-hidden ">
           <SocialLinks socialLinks={jam.social_links} />
+
           <UpvoteReport jamId={jam.id} />
-        </div>
-
-        {/* <JamComments/> */}
-        <CommentSection
-          jamId={jam.id}
-          comments={jam.comments}
-          host_name={jam.host_name}
-        />
-
-        <SiteFooter />
+        </aside>
       </div>
+
+      <CommentSection
+        jamId={jam.id}
+        comments={jam.comments}
+        host_name={jam.host_name}
+      />
+
+      <SiteFooter />
     </div>
   );
 }
