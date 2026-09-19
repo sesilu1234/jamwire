@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { JamCard } from '@/types/jam';
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 
 type JamCarouselProps = {
   jams: JamCard[];
@@ -34,15 +35,33 @@ export default function JamCarousel({
     <div
       className={`flex flex-col max-w-[95%] absolute top-8 left-1/2 -translate-x-1/2 md:top-8 md:left-18 md:translate-x-0 z-[50] gap-1`}
     >
-      {/* Collapse button */}
-      <div
-        className="p-2 flex items-center justify-center rounded-t-sm
-               bg-collapse-butt/80 text-white cursor-pointer 
-               hover:bg-collapse-butt/70 transition-all duration-200"
+      {/* Header. Was a full-width bar reading "Collapse cards" with no
+          indication of how many there were; the count is the useful part. */}
+      <button
+        type="button"
         onClick={() => setCollapsed(!collapsed)}
+        aria-expanded={!collapsed}
+        className={`flex cursor-pointer items-center justify-between gap-3 border border-tone-0/10 bg-surface-raised/90 px-4 py-2.5 backdrop-blur-md transition-colors hover:bg-surface-raised ${
+          collapsed ? 'rounded-xl' : 'rounded-t-xl border-b-0'
+        }`}
       >
-        {!collapsed ? 'Collapse cards' : 'Show cards'}
-      </div>
+        <span className="text-sm font-semibold text-tone-0">
+          {collapsed ? 'Show cards' : 'Hide cards'}
+        </span>
+
+        <span className="flex items-center gap-2">
+          {!loading && jams.length > 0 && (
+            <span className="rounded-full bg-tone-0/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-tone-0/70">
+              {jams.length}
+            </span>
+          )}
+          <ChevronDown
+            className={`size-4 text-tone-0/50 transition-transform duration-200 ${
+              collapsed ? '' : 'rotate-180'
+            }`}
+          />
+        </span>
+      </button>
 
       {/* Card container */}
       <div
