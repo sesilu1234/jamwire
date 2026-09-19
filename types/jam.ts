@@ -57,6 +57,8 @@ export interface JamCard {
   distance_meters: number;
   display_date: string;
   image: string;
+  /** 'jam' | 'open_mic'. Optional: older rows and some queries omit it. */
+  modality?: string;
 }
 
 export interface UserLocation {

@@ -25,14 +25,6 @@
 - mobile view arreglar y ver. y poner el logo en la home de mobile en algun
   sitio supongo ? y el header modificaarlo un pelin o ?
 
-- el filter panel va a haber que cambiarlo ... no esta mal ahora pero no queda
-  pro ..... y la parte superior del mapa tambien ... y las cards quizas no pero
-  se puede ver
-
-ah y quizas el mapa en si, el preset de leaflet tambien ... y los markers..
-
-- esta feo el contact de home
-
 - hacer checkeos a vista y manuales de todo de la jam : sobretodo de fechas (
   que fechas se gaaurdan, cuales se borra, el cron job , como se filtra y busca
   , si cambio edit una jam de manual a weekly que pasa...se guardaan fechas
