@@ -148,6 +148,7 @@ export default function JamCarousel({
               tags={jam.styles}
               address={jam.location_address}
               display_date={jam.display_date}
+              modality={jam.modality}
               src={jam.image}
               slug={jam.slug}
             />

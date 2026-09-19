@@ -8,13 +8,6 @@
       ... o mejorar un poco esa pagina para poder buscar jams directamente (sin
       mas un directorio de jams, incluso aunque no tengan fecha ...)
 
-- en movil las jams found number marcarlo en mapa quizas. y tambien quizas el
-  modo de busqueda
-
-- en pc , dar mas pading arriba un pelin para que respire en home ( y lo de que
-  son las jams y eplicacion..eso igual quitarlo pues queda mal ... o ponerlo
-  despues de cities, o mejorarlo con colores....)
-
 - cambiar colores, de bacground digo esencialmente ... dark es muy oscuro y el
   light mode da asco
 
@@ -24,14 +17,6 @@
 
 - mobile view arreglar y ver. y poner el logo en la home de mobile en algun
   sitio supongo ? y el header modificaarlo un pelin o ?
-
-- el filter panel va a haber que cambiarlo ... no esta mal ahora pero no queda
-  pro ..... y la parte superior del mapa tambien ... y las cards quizas no pero
-  se puede ver
-
-ah y quizas el mapa en si, el preset de leaflet tambien ... y los markers..
-
-- esta feo el contact de home
 
 - hacer checkeos a vista y manuales de todo de la jam : sobretodo de fechas (
   que fechas se gaaurdan, cuales se borra, el cron job , como se filtra y busca

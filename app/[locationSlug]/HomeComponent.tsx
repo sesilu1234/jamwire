@@ -28,7 +28,9 @@ interface HomeComponentProps {
   recentJams: RecentJam[];
 }
 
-const MapRender = dynamic(() => import('@/components/map/MapRender'), { ssr: false });
+const MapRender = dynamic(() => import('@/components/map/MapRender'), {
+  ssr: false,
+});
 
 export default function HomeComponent({
   cards,
@@ -48,7 +50,7 @@ export default function HomeComponent({
         currentUsedPath={currentUsedPath}
       >
         {/* Phone: full-bleed map shell. From md: the original centered page. */}
-        <div className="relative flex flex-col w-full px-2 pt-16 md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0">
+        <div className="relative flex flex-col w-full px-2 pt-16 md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0 mt-4">
           {/* ── Header: one bar ──────────────────────────────────────────
               Logo, search, filter and avatar on a single row. The search
               input and <Filtro> are single instances repositioned by CSS,
@@ -136,8 +138,8 @@ export default function HomeComponent({
               <p className="text-sm leading-relaxed">
                 A gathering where musicians get on stage and play together,
                 improvising in the moment. You don&apos;t need to know anyone
-                beforehand, and every night sounds different. Anyone can join
-                in — or just hang out, listen, and have a good time.
+                beforehand, and every night sounds different. Anyone can join in
+                — or just hang out, listen, and have a good time.
               </p>
             </div>
 

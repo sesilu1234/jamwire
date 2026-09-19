@@ -1,83 +1,77 @@
-
-import { useEffect, useState, useRef } from 'react';
+import { CalendarClock, MapPin, ExternalLink } from 'lucide-react';
 
 type TimeAndPlaceProps = {
-	location_title: string;
-	address?: string;
-	fallbackLat: number;
-	fallbackLng: number;
-	slug: string;
-	time: string;
+  location_title: string;
+  address?: string;
+  fallbackLat: number;
+  fallbackLng: number;
+  slug: string;
+  time: string;
 };
 
 export default function TimeAndPlace({
-	location_title,
-	address,
-	fallbackLat,
-	fallbackLng,
-	slug,
-	time,
+  location_title,
+  address,
+  fallbackLat,
+  fallbackLng,
+  slug,
+  time,
 }: TimeAndPlaceProps) {
-	const hasAddress = address && address.trim().length > 0;
+  const hasAddress = address && address.trim().length > 0;
 
-	const googleMapsUrl = hasAddress
-		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-				address!,
-		  )}`
-		: `https://www.google.com/maps/search/?api=1&query=${fallbackLat},${fallbackLng}`;
+  const googleMapsUrl = hasAddress
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        address!,
+      )}`
+    : `https://www.google.com/maps/search/?api=1&query=${fallbackLat},${fallbackLng}`;
 
+  return (
+    <div className="flex flex-col gap-6">
+      {/* When */}
+      <div className="flex items-start gap-4">
+        {/* Icons were 43px hand-drawn SVGs at three different sizes, in blue
+            and red — the only two off-palette colours on the page. */}
+        <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-tone-0/7 text-tone-0/60">
+          <CalendarClock className="size-5" strokeWidth={1.75} />
+        </span>
 
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-[0.18em] text-tone-0/40 uppercase">
+            When
+          </p>
+          <p className="mt-1 text-xl leading-tight font-semibold">{time}</p>
+        </div>
+      </div>
 
-	
-	
+      <div className="h-px w-full bg-tone-0/10" />
 
-	return (
-		<div className="gap-4 flex flex-col">
-			<div className="gap-5 flex flex-row items-center pb-2">
-				<svg
-					width="43"
-					height="35"
-					viewBox="0 0 43 35"
-					className="text-primary-1"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M8.79056 12.6692H33.4048V9.07291C33.4048 8.96214 33.3484 8.86073 33.2356 8.76867C33.1231 8.67636 32.9991 8.63021 32.8638 8.63021H9.33164C9.19626 8.63021 9.07231 8.67636 8.95979 8.76867C8.84697 8.86073 8.79056 8.96214 8.79056 9.07291V12.6692ZM9.33164 30.9269C8.44347 30.9269 7.69171 30.6752 7.07636 30.1717C6.461 29.6682 6.15332 29.0531 6.15332 28.3265V9.07291C6.15332 8.34623 6.461 7.73115 7.07636 7.22768C7.69171 6.7242 8.44347 6.47247 9.33164 6.47247H11.7658V3.42969H14.4707V6.47247H27.7923V3.42969H30.4296V6.47247H32.8638C33.7519 6.47247 34.5037 6.7242 35.119 7.22768C35.7344 7.73115 36.0421 8.34623 36.0421 9.07291V16.9321C35.6204 16.7809 35.1898 16.6586 34.7503 16.5653C34.3107 16.4723 33.8623 16.3991 33.4048 16.3456V14.8269H8.79056V28.3265C8.79056 28.4372 8.84697 28.5386 8.95979 28.6307C9.07231 28.723 9.19626 28.7692 9.33164 28.7692H20.7632C20.9118 29.1674 21.0915 29.544 21.3025 29.8991C21.5132 30.2542 21.7526 30.5968 22.0207 30.9269H9.33164ZM31.9847 32.3654C29.7893 32.3654 27.9219 31.7356 26.3823 30.4759C24.8427 29.2163 24.073 27.6884 24.073 25.8922C24.073 24.096 24.8427 22.568 26.3823 21.3084C27.9219 20.0488 29.7893 19.4189 31.9847 19.4189C34.1803 19.4189 36.0478 20.0488 37.5871 21.3084C39.1266 22.568 39.8964 24.096 39.8964 25.8922C39.8964 27.6884 39.1266 29.2163 37.5871 30.4759C36.0478 31.7356 34.1803 32.3654 31.9847 32.3654ZM34.9129 29.1842L36.0082 28.288L32.7627 25.6322V21.6598H31.2071V26.1522L34.9129 29.1842Z"
-						fill="currentColor"
-					/>
-				</svg>
+      {/* Where — a real link rather than a div with an onClick, so it can be
+          opened in a new tab, copied, and reached from the keyboard. */}
+      <a
+        href={googleMapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-start gap-4"
+      >
+        <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-tone-0/7 text-tone-0/60 transition-colors group-hover:bg-tone-0/12 group-hover:text-tone-0/85">
+          <MapPin className="size-5" strokeWidth={1.75} />
+        </span>
 
-				<h1 className="text-2xl font-medium">{time}</h1>
-			</div>
-
-			<div className="h-[1.5px] bg-gray-300/20 w-3/5 mx-auto"></div>
-
-			<div
-				className="gap-5 flex flex-row items-center  cursor-pointer hover:underline"
-				onClick={() => window.open(googleMapsUrl, "_blank")}
-			>
-				<svg
-					width="43"
-					height="43"
-					viewBox="0 0 43 43"
-					className="text-red-400 flex-shrink-0"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M20.6185 36.9408C17.7153 36.9408 15.3429 36.5241 13.5013 35.6908C11.6597 34.8575 10.7388 33.7817 10.7388 32.4636C10.7388 31.8533 10.9685 31.2795 11.4278 30.742C11.8872 30.2044 12.5222 29.743 13.3329 29.3575L15.3617 31.1981C14.9937 31.3456 14.607 31.5295 14.2015 31.7497C13.7962 31.9702 13.5188 32.2026 13.369 32.4468C13.6531 32.9603 14.4984 33.408 15.9051 33.79C17.3114 34.1723 18.8798 34.3635 20.6104 34.3635C22.3406 34.3635 23.9162 34.1723 25.3371 33.79C26.7578 33.408 27.6103 32.9603 27.8947 32.4468C27.7492 32.1848 27.4557 31.9437 27.0141 31.7235C26.5722 31.5033 26.1531 31.3193 25.7568 31.1715L27.7589 29.3047C28.6378 29.7079 29.3141 30.1782 29.7877 30.7157C30.2614 31.2533 30.4982 31.8334 30.4982 32.4563C30.4982 33.7767 29.5774 34.8542 27.7358 35.6887C25.8941 36.5234 23.5217 36.9408 20.6185 36.9408ZM20.6615 28.5646C23.5074 26.4079 25.6436 24.2718 27.07 22.1561C28.4963 20.0401 29.2095 17.9392 29.2095 15.8533C29.2095 12.8885 28.2816 10.6506 26.4256 9.1394C24.5697 7.62795 22.6367 6.87223 20.6267 6.87223C18.6167 6.87223 16.681 7.62838 14.8196 9.14069C12.9582 10.6527 12.0275 12.8918 12.0275 15.858C12.0275 17.8064 12.7318 19.8271 14.1405 21.9198C15.5491 24.0126 17.7228 26.2275 20.6615 28.5646ZM20.6185 31.7862C16.8691 28.9829 14.0704 26.2604 12.2225 23.6187C10.3743 20.9773 9.4502 18.3896 9.4502 15.8559C9.4502 13.9421 9.78782 12.266 10.4631 10.8275C11.1383 9.38911 12.01 8.18465 13.0782 7.21415C14.1466 6.24394 15.3454 5.51485 16.6744 5.02688C18.0031 4.53891 19.3187 4.29492 20.6211 4.29492C21.9235 4.29492 23.2382 4.53891 24.5652 5.02688C25.8926 5.51485 27.0904 6.24394 28.1589 7.21415C29.227 8.18465 30.0987 9.38954 30.774 10.8288C31.4492 12.2681 31.7869 13.9429 31.7869 15.8533C31.7869 18.3873 30.8627 20.9754 29.0145 23.6174C27.1666 26.2594 24.3679 28.9824 20.6185 31.7862ZM20.6267 18.718C21.4781 18.718 22.2071 18.4173 22.814 17.8159C23.4211 17.2145 23.7246 16.4826 23.7246 15.62C23.7246 14.7578 23.4205 14.0232 22.8122 13.4164C22.204 12.8093 21.4728 12.5058 20.6185 12.5058C19.7726 12.5058 19.0435 12.8099 18.4312 13.4182C17.8187 14.0267 17.5124 14.7579 17.5124 15.6119C17.5124 16.4799 17.8187 17.2145 18.4312 17.8159C19.0435 18.4173 19.7753 18.718 20.6267 18.718Z"
-						fill="currentColor"
-					/>
-				</svg>
-
-				<div className="">
-					<h4 className="text-2xl font-medium col-start-2 row-start-1">
-						{location_title}
-					</h4>
-					<h2 className="col-start-2 row-start-2 text-xl opacity-85">
-						{address}
-					</h2>
-				</div>
-			</div>
-		</div>
-	);
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-[0.18em] text-tone-0/40 uppercase">
+            Where
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-xl leading-tight font-semibold">
+            <span className="truncate">{location_title}</span>
+            <ExternalLink className="size-3.5 shrink-0 text-tone-0/35 transition-colors group-hover:text-tone-0/70" />
+          </p>
+          {address && (
+            <p className="mt-1 text-sm leading-relaxed text-tone-0/60 group-hover:text-tone-0/80">
+              {address}
+            </p>
+          )}
+        </div>
+      </a>
+    </div>
+  );
 }

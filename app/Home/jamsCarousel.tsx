@@ -90,18 +90,17 @@ export default function JamCarousel({
               Cards not available with global search
             </div>
           ) : (
-    <div className="flex flex-col items-center justify-center p-8 text-center w-full max-w-sm mx-auto animate-fadeIn">
- 
-      <h3 className="text-lg font-bold uppercase tracking-tight mb-2">
-        No active jam sessions found here right now
-      </h3>
-      <p className="text-sm text-text-2 font-medium mb-6">
-        The stage is currently quiet... Help us find the music!
-      </p>
-      
-     <Link 
-  href="/host"
-  className="
+            <div className="flex flex-col items-center justify-center p-8 text-center w-full max-w-sm mx-auto animate-fadeIn">
+              <h3 className="text-lg font-bold uppercase tracking-tight mb-2">
+                No active jam sessions found here right now
+              </h3>
+              <p className="text-sm text-text-2 font-medium mb-6">
+                The stage is currently quiet... Help us find the music!
+              </p>
+
+              <Link
+                href="/host"
+                className="
     /* Layout & Text */
     px-4 py-4 md:px-4 md:py-3 
     text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em]
@@ -129,25 +128,26 @@ export default function JamCarousel({
     /* Box Model */
     inline-block flex items-center justify-center
   "
->
-  + Add a Jam Spot
-</Link>
-      
-      <p className="mt-4 text-[10px] text-tone-0/80 uppercase tracking-widest">
-        Be the legend who starts the first one in this city
-      </p>
-    </div>
-  )
+              >
+                + Add a Jam Spot
+              </Link>
+
+              <p className="mt-4 text-[10px] text-tone-0/80 uppercase tracking-widest">
+                Be the legend who starts the first one in this city
+              </p>
+            </div>
+          )
         ) : (
           jams.map((jam: JamCard, index: number) => (
             <JamCardShadcn
               key={index}
-              classname="cursor-pointer border-2 border-tone-0/75"
+              classname="cursor-pointer border-2 border-tone-0/45"
               jamName={jam.jam_title}
               spotName={jam.location_title}
               tags={jam.styles}
               address={jam.location_address}
               display_date={jam.display_date}
+              modality={jam.modality}
               src={jam.image}
               slug={jam.slug}
             />
