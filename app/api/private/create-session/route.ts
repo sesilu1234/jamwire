@@ -159,7 +159,7 @@ export async function POST(req: Request) {
      *
      * Resolved from the coordinates rather than from `location_address`, and
      * never allowed to fail the request: a jam with no city still works
-     * everywhere except /cities, and the backfill route picks it up later.
+     * everywhere except /cities, and re-saving it in the editor resolves it.
      */
     const place = await placeFromCoords(lat, lng);
 
