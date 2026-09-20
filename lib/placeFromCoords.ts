@@ -22,8 +22,8 @@ const EMPTY: Place = { city: null, country: null, countryCode: null };
  * `locality` of a point is one canonical string.
  *
  * Never throws. A jam whose city could not be resolved is still a perfectly
- * good jam; it just doesn't appear in the city directory until the backfill is
- * run again.
+ * good jam; it just stays out of the city directory until someone re-saves it
+ * in the editor.
  */
 export async function placeFromCoords(
   lat: number,
