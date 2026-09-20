@@ -100,17 +100,48 @@ export default async function HomePage() {
           name: jam.location_title || 'Venue',
           address: { '@type': 'PostalAddress', streetAddress: jam.location_address || '' },
         },
-        image: jam.images?.[0] || `${siteUrl}${BRAND.ogImage}`,
+        /**
+         * Deliberately the brand card, not `jam.images[0]`.
+         *
+         * Google picks the thumbnail beside a result from what the page
+         * offers it, and this list was handing it twenty specific venue
+         * photos - so the home page showed up in search with one random
+         * jam's poster next to it. The per-jam photos still reach Google
+         * through each jam's own page, which is where they belong.
+         */
+        image: `${siteUrl}${BRAND.ogImage}`,
         description: `Join the ${jam.jam_title} at ${jam.location_title}.`,
       },
     })),
   };
 
 
+  /**
+   * What Google uses to work out a site's name for the result header.
+   *
+   * It doesn't guarantee the title is left alone - Google rewrites titles on
+   * its own terms - but without this it has only the domain and the <title>
+   * to go on, and "Jamwire: <title>" is what it produces when it is guessing.
+   */
+  const siteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: BRAND.name,
+    alternateName: BRAND.nameLower,
+    url: siteUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: BRAND.name,
+      url: siteUrl,
+      logo: `${siteUrl}${BRAND.logo}`,
+    },
+  };
+
   // Independent of the map query, so a slow or empty result never blocks it.
   const recentJams = await getRecentJams();
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <HomeComponent
         cards={(homeCards || []) as JamCard[]}

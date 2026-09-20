@@ -1,5 +1,7 @@
 // app/jam/[jamId]/page.tsx
 import { getJam } from '@/lib/getJam';
+import { getHomeCards } from '@/lib/getHomeCards';
+import { JamCard } from '@/types/jam';
 import JamComponent from './JamComponent';
 import { Metadata } from 'next';
 import { BRAND } from '@/lib/brand';
@@ -70,6 +72,29 @@ export default async function JamPage({ params }: Props) {
   if (!jam) notFound();
 
   // 2️⃣ Datos de localización dinámicos
+  /**
+   * Other jams within 10 km.
+   *
+   * Reuses the same RPC the map runs, centred on this venue instead of on the
+   * visitor. A jam page arrived at from Google used to be a dead end: the only
+   * way onward was back to the map. Kept deliberately narrow - 10 km, the next
+   * seven days, soonest first - so what shows up is somewhere you could
+   * actually go this week. If nothing matches, the section doesn't render.
+   */
+  const nearbyRaw = await getHomeCards({
+    dateOptions: 'week',
+    lat: jam.lat,
+    lng: jam.lng,
+    distance: '10',
+    styles: JSON.stringify([]),
+    modality: JSON.stringify(['jam', 'open_mic']),
+    order: 'soonest',
+  });
+
+  const nearbyJams = ((nearbyRaw ?? []) as JamCard[])
+    .filter((card) => card.slug && card.slug !== jam.slug)
+    .slice(0, 3);
+
   const { street, city, country, countryCode, currency } = getLocationData(jam.location_address);
 
   const styleArray = Array.isArray(jam.styles) 
@@ -126,7 +151,10 @@ const simpleDescription = `${eventType} at ${jam.location_title}, ${city}. Open 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <JamComponent jam={jam as unknown as JamWithComments} />
+      <JamComponent
+        jam={jam as unknown as JamWithComments}
+        nearbyJams={nearbyJams}
+      />
     </>
   );
 }

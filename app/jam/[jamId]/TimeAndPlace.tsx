@@ -7,6 +7,10 @@ type TimeAndPlaceProps = {
   fallbackLng: number;
   slug: string;
   time: string;
+  /** "Every Thursday", for a weekly jam. */
+  recurrence?: string | null;
+  /** The session after this one, as "1 Nov". Only for non-weekly jams. */
+  followingDate?: string | null;
 };
 
 export default function TimeAndPlace({
@@ -16,6 +20,8 @@ export default function TimeAndPlace({
   fallbackLng,
   slug,
   time,
+  recurrence,
+  followingDate,
 }: TimeAndPlaceProps) {
   const hasAddress = address && address.trim().length > 0;
 
@@ -40,6 +46,28 @@ export default function TimeAndPlace({
             When
           </p>
           <p className="mt-1 text-xl leading-tight font-semibold">{time}</p>
+
+          {/* A jam page used to show one date and stop there, which reads the
+              same whether the jam is a weekly fixture or a single night.
+
+              Only one of these two ever appears. A weekly jam says it recurs
+              and leaves it there; naming next Monday would just offer an
+              excuse to skip tonight. A monthly one names the following date,
+              because there the wait is the argument for turning up. */}
+          {recurrence && (
+            <p className="mt-1.5 text-sm font-medium text-tone-0/60">
+              {recurrence}
+            </p>
+          )}
+
+          {!recurrence && followingDate && (
+            <p className="mt-1.5 text-sm text-tone-0/45">
+              Next one:{' '}
+              <span className="font-medium text-tone-0/60">
+                {followingDate}
+              </span>
+            </p>
+          )}
         </div>
       </div>
 

@@ -1,12 +1,10 @@
-import { headers, cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { getHomeCards } from '@/lib/getHomeCards';
 import { getRecentJams } from '@/lib/getRecentJams';
 import HomeComponent from './HomeComponent'; 
 import { JamCard } from '@/types/jam';
 import { Metadata } from 'next';
 import { BRAND } from '@/lib/brand';
-
-const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
 export async function generateMetadata({ params }: { params: Promise<{ locationSlug: string }> }): Promise<Metadata> {
   const { locationSlug } = await params;
@@ -48,59 +46,72 @@ export async function generateMetadata({ params }: { params: Promise<{ locationS
   };
 }
 
+/**
+ * Geocodes the slug, and distinguishes "this is not a place" from "we couldn't
+ * ask".
+ *
+ * That distinction is the whole safety of the 404 below. It used to return
+ * `null` for both cases, which was harmless only because the caller fell back
+ * to Madrid. Now that `null` means 404, treating them the same would mean a
+ * missing or rate-limited API key deindexes every city page on the site.
+ *
+ * - `ZERO_RESULTS`: Google is confident the string is not a place -> null -> 404.
+ * - Anything else (`REQUEST_DENIED` for a bad or absent key, `OVER_QUERY_LIMIT`,
+ *   a network failure): our problem, not the URL's. It throws, so the visitor
+ *   gets a 500 that search engines retry, instead of a 404 that removes a real
+ *   city from the index.
+ */
 async function getCoordsFromSlug(slug: string) {
   const query = decodeURIComponent(slug).replace(/-/g, ' ');
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${apiKey}`,
-      { next: { revalidate: 86400 } } 
-    );
-    const data = await response.json();
-     
-    if (data.results?.[0]) {
-      const { lat, lng } = data.results[0].geometry.location;
-      return { city: data.results[0].formatted_address, latitude: lat, longitude: lng };
-    }
-  } catch (e) { return null; }
-  return null;
+
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`,
+    { next: { revalidate: 86400 } },
+  );
+
+  const data = await response.json();
+
+  if (data.results?.[0]) {
+    const { lat, lng } = data.results[0].geometry.location;
+    return {
+      city: data.results[0].formatted_address,
+      latitude: lat,
+      longitude: lng,
+    };
+  }
+
+  if (data.status === 'ZERO_RESULTS') return null;
+
+  // Loud on purpose: this is the state where the whole city section is down.
+  throw new Error(
+    `Geocoding failed for "${slug}": ${data.status ?? response.status}${
+      data.error_message ? ` - ${data.error_message}` : ''
+    }`,
+  );
 }
 
 export default async function CityPage({ params }: { params: Promise<{ locationSlug: string }> }) {
   const { locationSlug } = await params;
-  const headerList = await headers();
-  const cookieStore = await cookies();
 
-  // 1️⃣ PRIORIDAD 1: Intentar por Slug
-  let userLocation = await getCoordsFromSlug(locationSlug);
+  /**
+   * The URL *is* the place here, so there is nothing to fall back to.
+   *
+   * This used to fall through to the cookie, then the Vercel IP headers, then
+   * Madrid - the same chain the home page uses. On `/` that chain is right: no
+   * place is named, so any guess beats nothing. On `/[locationSlug]` it meant
+   * every string on the internet resolved to a page: `/asdasd` rendered
+   * Madrid's jams under a "Jam Sessions in Asdasd" heading, and every one of
+   * them was an indexable URL with a JSON-LD ItemList behind it.
+   *
+   * This is *not* the "no jams here" case. A real city with nothing in it
+   * still renders, with an empty list and the invitation to add the first jam.
+   * Only a place that does not exist 404s.
+   */
+  const userLocation = await getCoordsFromSlug(locationSlug);
 
- 
-
-  // 2️⃣ PRIORIDAD 2: Si no hay slug o falla, usar tu lógica de Cookie
   if (!userLocation) {
-    const locationCookie = cookieStore.get('user_location');
-    if (locationCookie) {
-
-      try {
-        const parsed = JSON.parse(decodeURIComponent(locationCookie.value));
-        if (Date.now() - parsed.timestamp < FOUR_HOURS) {
-          userLocation = { city: parsed.city, latitude: parsed.latitude, longitude: parsed.longitude };
-        }
-      } catch (e) { console.error("Error cookie", e); }
-    }
-  }
-
-  // 3️⃣ PRIORIDAD 3: Si sigue sin haber ubicación, Vercel Headers o Madrid
-  if (!userLocation) {
-    const cityHeader = headerList.get('x-vercel-ip-city');
-    const latHeader = headerList.get('x-vercel-ip-latitude');
-    const lonHeader = headerList.get('x-vercel-ip-longitude');
-
-    
-
-    userLocation = cityHeader && latHeader && lonHeader
-      ? { city: decodeURIComponent(cityHeader), latitude: Number(latHeader), longitude: Number(lonHeader) }
-      : { city: 'Madrid, Spain', latitude: 40.4168, longitude: -3.7038 };
+    notFound();
   }
 
   // 4️⃣ FETCH DATA

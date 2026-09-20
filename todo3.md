@@ -11,14 +11,19 @@
 - cambiar colores, de bacground digo esencialmente ... dark es muy oscuro y el
   light mode da asco
 
-- y la ruta de ciudades, quizas que te ponga un listado de jams
-
-- y tambien un poquito mejor hacer las jams slugs
-
 - mobile view arreglar y ver. y poner el logo en la home de mobile en algun
-  sitio supongo ? y el header modificaarlo un pelin o ?
+  sitio supongo ? y el header modificaarlo un pelin o ? ademas el footer
+  cambiarlo seguramente
 
 - hacer checkeos a vista y manuales de todo de la jam : sobretodo de fechas (
   que fechas se gaaurdan, cuales se borra, el cron job , como se filtra y busca
   , si cambio edit una jam de manual a weekly que pasa...se guardaan fechas
   anteriores o se sustituye todo... ? cuando deleto una jam que pasa ?)
+
+- y algunos tips o recomendaciones para cerrar la app bien . pongo poryect en
+  public en github ?
+
+- { code: '23503', details: 'Key (id)=(c6fff773-620d-475c-a2ef-edd3e2e1f3f3) is
+  still referenced from table "comment_reports".', hint: null, message: 'update
+  or delete on table "comments" violates foreign key constraint
+  "comment_reports_comment_id_fkey" on table "comment_reports"' }

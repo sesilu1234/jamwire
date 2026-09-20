@@ -7,11 +7,21 @@ import { authOptions } from '../app/api/auth/[...nextauth]/route';
 
 import { Jam } from '../types/jam';
 
+/**
+ * Exactly what `get_jam_by_slug` returns, verified against the RPC.
+ *
+ * This used to also declare `periodicity`, `dayOfWeek`, `dates`, `created_at`,
+ * `location_coords`, `host_id`, `time_start` and `f_next_date`. None of them
+ * come back from that function, so anything reading them got `undefined` while
+ * TypeScript reported a `string`. `periodicity` and `dayOfWeek` are fetched
+ * separately in `getJam` below; `dates` lives in the `jam_dates` table.
+ */
 type JamSessionResult = {
   id: string;
   slug: string;
   modality: string;
   jam_title: string;
+  host_name: string | null;
   location_title: string;
   images: string[] | null;
   styles: string[] | null;
@@ -25,18 +35,6 @@ type JamSessionResult = {
   social_links: any;
   next_date: string | null;
   next_date_timezone: string | null;
-  periodicity: string;
-  dayOfWeek: string;
-    created_at: string;
-
-
-dates: string[];
- location_coords: string;
-  host_id: string;
-   time_start: string;
-    f_next_date: string;
-
-
 };
 
 export const getJam = cache(async (slug: string) => {
@@ -49,9 +47,21 @@ export const getJam = cache(async (slug: string) => {
   const userEmail = session?.user.email || null;
   
   
-  const [jamResponse, commentsResponse] = await Promise.all([
+  const [jamResponse, commentsResponse, scheduleResponse] = await Promise.all([
     supabaseAdmin.rpc('get_jam_by_slug', { p_slug: slug }).maybeSingle(),
-    supabaseAdmin.rpc('get_comments_for_jam', { p_jam_slug: slug, p_email: userEmail })
+    supabaseAdmin.rpc('get_comments_for_jam', { p_jam_slug: slug, p_email: userEmail }),
+
+    /**
+     * `get_jam_by_slug` does not return these two, despite what
+     * `JamSessionResult` used to claim - it selects 18 columns and neither is
+     * among them. Read
+     * straight from the table rather than changing the RPC, which is shared.
+     */
+    supabaseAdmin
+      .from('sessions')
+      .select('periodicity, dayOfWeek')
+      .eq('slug', slug)
+      .maybeSingle(),
   ]);
 
   const { data: jamData, error: jamError } = jamResponse;
@@ -100,18 +110,65 @@ const formattedComments = (commentsData || []).map((comment: any) => {
 
   if (!jam) return null;
 
+  const schedule = scheduleResponse.data;
+
   const localTime = (jam.next_date && jam.next_date_timezone)
     ? DateTime.fromISO(jam.next_date).setZone(jam.next_date_timezone)
     : null;
 
+  /**
+   * How the schedule is put across depends on the shape of the jam.
+   *
+   * A weekly one says "Every Monday" and stops there: the date after this one
+   * is next Monday, and spelling that out only hands the reader a reason to
+   * skip tonight. A monthly or one-off jam gets the following date instead,
+   * where the gap is the point - if you miss tonight you are waiting a month.
+   *
+   * So only one of the two is ever produced, and the query for the second one
+   * doesn't run at all for a weekly jam.
+   */
+  const isWeekly = schedule?.periodicity === 'weekly';
 
-    
+  const recurrenceLabel =
+    isWeekly && schedule?.dayOfWeek
+      ? `Every ${schedule.dayOfWeek.charAt(0).toUpperCase()}${schedule.dayOfWeek.slice(1).toLowerCase()}`
+      : null;
+
+  /**
+   * `sessions.dates` is the raw form input (plain dates for a manual jam,
+   * nothing at all for a weekly one), so the resolved instants in `jam_dates`
+   * are the only usable source - the same one `next_date` comes from.
+   *
+   * Anchored past `next_date` rather than past now, so the row already shown
+   * as `display_date` is never the one returned.
+   */
+  let followingDate: string | null = null;
+
+  if (!isWeekly) {
+    const { data: dateRow } = await supabaseAdmin
+      .from('jam_dates')
+      .select('utc_datetime, jam_timezone')
+      .eq('jam_id', jam.id)
+      .gt('utc_datetime', jam.next_date ?? DateTime.now().toISO())
+      .order('utc_datetime', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (dateRow) {
+      const local = DateTime.fromISO(dateRow.utc_datetime).setZone(
+        dateRow.jam_timezone ?? jam.next_date_timezone ?? 'utc',
+      );
+      followingDate = local.isValid ? local.toFormat('d LLL') : null;
+    }
+  }
 
   return {
     ...jam,
     display_date: localTime && localTime.isValid
-      ? localTime.toFormat('ccc d LLL, HH:mm') 
+      ? localTime.toFormat('ccc d LLL, HH:mm')
       : 'Date TBD',
+    following_date: followingDate,
+    recurrence_label: recurrenceLabel,
        iso_date: localTime && localTime.isValid
     ? localTime.toISO() // for JSON-LD / Google
     : null,

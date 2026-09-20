@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { success, z } from 'zod';
 import { validateJam } from './serverCheck';
 import { uploadPhotos } from '@/lib/upload-photos';
+import { placeFromCoords } from '@/lib/placeFromCoords';
 import { find as geoTz } from 'geo-tz';
 import tzlookup from 'tz-lookup';
 
@@ -153,6 +154,15 @@ export async function POST(req: Request) {
 
 
 
+    /**
+     * The town this jam is in, for the city directory.
+     *
+     * Resolved from the coordinates rather than from `location_address`, and
+     * never allowed to fail the request: a jam with no city still works
+     * everywhere except /cities, and the backfill route picks it up later.
+     */
+    const place = await placeFromCoords(lat, lng);
+
     const { data, error } = await supabaseAdmin.from('sessions').insert([
       {
         id: id,
@@ -175,7 +185,10 @@ export async function POST(req: Request) {
 
         location_address: location_address,
         slug: slug,
-        timezone: tz
+        timezone: tz,
+        city: place.city,
+        country: place.country,
+        country_code: place.countryCode,
       },
     ]);
 

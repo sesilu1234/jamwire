@@ -5,6 +5,7 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 import { success, z } from 'zod';
 import { validateJam } from './serverCheck';
 import { uploadPhotos } from '@/lib/upload-photos';
+import { placeFromCoords } from '@/lib/placeFromCoords';
 
 import { find as geoTz } from 'geo-tz';
 import tzlookup from 'tz-lookup';
@@ -134,6 +135,16 @@ export async function POST(
 
   
 
+    /**
+     * Re-resolved on every edit, because the venue may have moved. Falls back
+     * to leaving the stored city untouched if geocoding gives nothing, rather
+     * than blanking a city that was already correct.
+     */
+    const place = await placeFromCoords(
+      parseFloat(location_coords?.lat),
+      parseFloat(location_coords?.lng),
+    );
+
     const { data, error } = await supabaseAdmin
       .from('sessions')
       .update([
@@ -142,6 +153,13 @@ export async function POST(
           location_coords: pointValue,
           timezone: tz,
           validated:false,
+          ...(place.city
+            ? {
+                city: place.city,
+                country: place.country,
+                country_code: place.countryCode,
+              }
+            : {}),
         },
       ])
       .eq('id', id)

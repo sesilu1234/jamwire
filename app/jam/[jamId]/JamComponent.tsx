@@ -11,6 +11,7 @@ import { RawDraftContentState } from 'draft-js';
 
 import SocialLinks from './SocialLinks';
 import UpvoteReport from './UpvoteReport';
+import Confirmations from './Confirmations';
 import StaticMap from './LocationImageGMaps';
 import TimeAndPlace from './TimeAndPlace';
 import JamChars from './JamChars';
@@ -20,6 +21,8 @@ import { Space_Grotesk } from 'next/font/google';
 import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
 import SiteFooter from '@/components/SiteFooter';
+import JamCardShadcn from '@/components/map/CardJam';
+import { JamCard } from '@/types/jam';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -35,7 +38,7 @@ const HtmlReadOnly = ({ rawContent }: HtmlReadOnlyProps) => {
 
   return (
     <div
-      className="max-w-prose space-y-5 text-lg leading-relaxed tracking-wide text-pretty"
+      className="max-w-prose space-y-4 text-base leading-relaxed tracking-normal text-pretty"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -44,6 +47,10 @@ const HtmlReadOnly = ({ rawContent }: HtmlReadOnlyProps) => {
 export type JamWithComments = Jam & {
   comments: any;
   host_name: string;
+  /** The session after this one, formatted server-side in the jam's own zone. */
+  following_date?: string | null;
+  /** "Every Thursday", for a weekly jam. */
+  recurrence_label?: string | null;
 };
 
 /** One measure for every section, so nothing shifts as you scroll. */
@@ -58,7 +65,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function JamComponent({ jam }: { jam: JamWithComments }) {
+export default function JamComponent({
+  jam,
+  nearbyJams = [],
+}: {
+  jam: JamWithComments;
+  nearbyJams?: JamCard[];
+}) {
   if (!jam) return null;
 
   const isOpenMic = jam.modality === 'open_mic';
@@ -76,7 +89,9 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
       {/* Sticky: a jam page is usually the first thing someone sees from a
           shared link, so the way into the map shouldn't scroll away. */}
       <header className="sticky top-0 z-50 w-full border-b border-tone-0/10 bg-tone-5/80 backdrop-blur-md">
-        <div className={`${SHELL} flex items-center justify-between gap-4 py-3`}>
+        <div
+          className={`${SHELL} flex items-center justify-between gap-4 py-3`}
+        >
           <Link href="/" aria-label={BRAND.name} className="shrink-0">
             <BrandLogo className="h-8 w-auto object-contain" />
           </Link>
@@ -153,17 +168,37 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
         className={`${SHELL} grid grid-cols-1 gap-10 pt-12 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}
       >
         <main className="flex min-w-0 flex-col gap-12">
+          {/* The description is the only part of this page written by a
+              person, so it gets a lead-in paragraph and an accent rule
+              rather than sitting as one more undifferentiated block. */}
           <section>
-            <SectionLabel>About this jam</SectionLabel>
-            <div className="mt-4 text-tone-0/85">
-              <HtmlReadOnly
-                rawContent={JSON.parse(jam.description as unknown as string)}
+            <div className="flex items-center gap-4">
+              <SectionLabel>About this jam</SectionLabel>
+              <span
+                aria-hidden
+                className="h-px flex-1 bg-linear-to-r from-tone-0/15 to-transparent"
               />
+            </div>
+
+            <div className="relative mt-6 pl-5 sm:pl-7">
+              <span
+                aria-hidden
+                className="absolute top-1.5 bottom-1.5 left-0 w-px rounded-full opacity-60"
+                style={{
+                  backgroundImage: `linear-gradient(to bottom, ${accent}, transparent)`,
+                }}
+              />
+              <div className="text-tone-0/80 [&_p:first-child]:text-lg [&_p:first-child]:text-tone-0/95">
+                <HtmlReadOnly
+                  rawContent={JSON.parse(jam.description as unknown as string)}
+                />
+              </div>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-tone-0/10 bg-tone-0/4 p-8">
+          <section>
             <JamChars
+              accent={accent}
               jamDetails={{
                 styles: jam.styles,
                 drums: jam.drums,
@@ -219,8 +254,12 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
               fallbackLng={jam.lng}
               slug={jam.slug}
               time={jam.display_date}
+              recurrence={jam.recurrence_label}
+              followingDate={jam.following_date}
             />
           </div>
+
+          <Confirmations jamId={jam.id} />
 
           <SocialLinks socialLinks={jam.social_links} />
 
@@ -233,6 +272,39 @@ export default function JamComponent({ jam }: { jam: JamWithComments }) {
         comments={jam.comments}
         host_name={jam.host_name}
       />
+
+      {nearbyJams.length > 0 && (
+        <section className={`${SHELL} pb-20`}>
+          <div className="flex items-center gap-4">
+            <SectionLabel>More jams nearby</SectionLabel>
+            <span
+              aria-hidden
+              className="h-px flex-1 bg-linear-to-r from-tone-0/15 to-transparent"
+            />
+          </div>
+
+          <p className="mt-2 text-sm text-tone-0/50">
+            Within 10 km of {jam.location_title}, in the next seven days.
+          </p>
+
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {nearbyJams.map((card) => (
+              <JamCardShadcn
+                key={card.slug}
+                classname="cursor-pointer border border-tone-0/15"
+                jamName={card.jam_title}
+                spotName={card.location_title}
+                tags={card.styles}
+                address={card.location_address}
+                display_date={card.display_date}
+                modality={card.modality}
+                src={card.image}
+                slug={card.slug}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       <SiteFooter />
     </div>
