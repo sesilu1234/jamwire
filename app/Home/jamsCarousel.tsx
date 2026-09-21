@@ -93,6 +93,15 @@ export default function JamCarousel({
     }
   }, [searchType]);
 
+  // Nothing to peek at means peek is the wrong state: the sheet is
+  // transparent there, so the empty state was white text straight onto the
+  // map and unreadable. Open it so those words get the sheet behind them.
+  // A nudge, not a lock — dragging it back down still works.
+  useEffect(() => {
+    if (loading) return;
+    if (searchType === 'local' && jams.length === 0) setSnap('half');
+  }, [jams, loading, searchType]);
+
   // The strip keeps the scroll offset of the previous results, so without
   // this a new search opens part-way along the list.
   useEffect(() => {
@@ -221,7 +230,7 @@ export default function JamCarousel({
       <div
         ref={listRef}
         className={`card-container flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto px-4 pb-4
-          max-md:group-data-[snap=peek]/sheet:flex-row max-md:group-data-[snap=peek]/sheet:snap-x max-md:group-data-[snap=peek]/sheet:snap-proximity max-md:group-data-[snap=peek]/sheet:scroll-px-3 max-md:group-data-[snap=peek]/sheet:gap-3 max-md:group-data-[snap=peek]/sheet:overflow-x-auto max-md:group-data-[snap=peek]/sheet:overflow-y-hidden max-md:group-data-[snap=peek]/sheet:px-3 max-md:group-data-[snap=peek]/sheet:pt-2 max-md:group-data-[snap=peek]/sheet:pb-6
+          max-md:group-data-[snap=peek]/sheet:flex-row max-md:group-data-[snap=peek]/sheet:gap-3 max-md:group-data-[snap=peek]/sheet:overflow-x-auto max-md:group-data-[snap=peek]/sheet:overflow-y-hidden max-md:group-data-[snap=peek]/sheet:px-3 max-md:group-data-[snap=peek]/sheet:pt-2 max-md:group-data-[snap=peek]/sheet:pb-6
           md:flex-none md:gap-6 md:rounded-b-xl md:border md:border-black/20 md:bg-tone-3/45 md:transition-all md:duration-700 md:ease-in-out ${
             collapsed
               ? 'md:max-h-0 md:px-0 md:pt-0 md:pb-0 md:opacity-0'

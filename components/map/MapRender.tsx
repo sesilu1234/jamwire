@@ -164,6 +164,17 @@ export default function MapComponent() {
 			zoom={5}
 			style={{ height: "100%", width: "100%" }}
 			attributionControl={false}
+			// Leaflet repeats the world sideways by default, and markers are
+			// only ever placed at their real longitude. So panning west from
+			// Europe reached America with its pins, and panning east reached a
+			// copy of America with none — the same place, empty. One world and
+			// a hard edge removes the copy there is nothing to put in.
+			// -85/85 rather than -90/90: Web Mercator stops at about 85.
+			maxBounds={[
+				[-85, -180],
+				[85, 180],
+			]}
+			maxBoundsViscosity={1}
 		>
 			{/* The default control prints Leaflet's own prefix — the word
 			    "Leaflet" and a Ukraine flag — ahead of the credits. That prefix

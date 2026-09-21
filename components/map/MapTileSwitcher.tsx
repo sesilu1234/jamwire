@@ -58,6 +58,7 @@ export default function MapTileSwitcher({
   if (!stadiaFailed) {
     return (
       <TileLayer
+        noWrap
         key="stadia-alidade-bright"
         url={STADIA_URL}
         attribution={STADIA_ATTRIBUTION}
@@ -78,6 +79,7 @@ export default function MapTileSwitcher({
   return (
     <>
       <TileLayer
+        noWrap
         key="esri-base"
         url={`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`}
         attribution={ESRI_ATTRIBUTION}
@@ -88,6 +90,7 @@ export default function MapTileSwitcher({
       />
       {/* Esri keeps place names in a separate reference layer. */}
       <TileLayer
+        noWrap
         key="esri-labels"
         url={`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`}
         maxNativeZoom={16}
