@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
@@ -81,6 +82,11 @@ export default function Filtro({
   setSearchType,
 }: FiltroProps) {
   const [open, setOpen] = useState(false);
+
+  // The overlay is portalled, and a portal needs document — which does not
+  // exist during the server render.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const panelRef_1 = useRef<HTMLDivElement | null>(null);
   const panelRef_2 = useRef<HTMLDivElement | null>(null);
   const panelRef_3 = useRef<HTMLDivElement | null>(null);
@@ -376,7 +382,16 @@ export default function Filtro({
         <span className="text-sm select-none">Filters</span>
       </button>
 
-      {/* Overlay + Filter Panel.
+      {/* Overlay + Filter Panel, portalled to <body>.
+
+          The portal is the whole fix for the phone. On a phone <Filtro> sits
+          inside the top bar, and that bar has `backdrop-blur`. A
+          backdrop-filter makes an element the containing block for its
+          position:fixed descendants, so `fixed inset-0` here resolved against
+          a 64px-tall bar rather than the viewport: the overlay existed, it
+          just covered the bar and nothing else. Desktop was fine because the
+          bar is md:static with md:backdrop-blur-none, which is why this
+          looked like a phone-only bug.
 
           z-[1000], not 503. Leaflet's own panes and controls go up to 800,
           and neither .leaflet-container nor the map wrapper creates a
@@ -385,8 +400,10 @@ export default function Filtro({
           screen. The app's fixed bars sit at 900, and a filter panel is
           modal, so it belongs above those too. Blur raised from 1px, which
           was not perceptible at any size. */}
-      {open && (
-        <div className="fixed inset-0 z-[1000] flex flex-col items-center pt-5 
+      {open &&
+        mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-[1000] flex flex-col items-center pt-5 
                   bg-slate-900/50 backdrop-blur-[3px] transition-all duration-300">
           <div className="relative w-[92%] md:w-xl">
             <div
@@ -673,8 +690,9 @@ export default function Filtro({
               </div>
             )}
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
