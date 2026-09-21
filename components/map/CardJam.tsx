@@ -71,7 +71,7 @@ export default function JamCard({
 
   return (
     <Card
-      className={`group w-64 shrink-0 overflow-hidden rounded-xl bg-card-jams/85 p-0 shadow-md max-md:group-data-[snap=peek]/sheet:w-[78vw] max-md:group-data-[snap=peek]/sheet:max-w-[320px] max-md:group-data-[snap=peek]/sheet:snap-start ${classname ?? ''}`}
+      className={`group w-64 shrink-0 overflow-hidden rounded-xl bg-card-jams/85 p-0 shadow-md max-md:group-data-[snap=peek]/sheet:w-[78vw] max-md:group-data-[snap=peek]/sheet:max-w-[320px] ${classname ?? ''}`}
     >
       <Link
         href={`/jam/${slug}`}
