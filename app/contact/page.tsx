@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import BrandLogo from '@/components/BrandLogo';
 import SiteFooter from '@/components/SiteFooter';
+import SignInIcons from '@/components/map/SingInIcons';
 import { BRAND } from '@/lib/brand';
 
 
@@ -96,9 +97,17 @@ export default function Contact() {
   return (
     <div className="flex min-h-screen flex-col bg-tone-5 text-tone-0">
       <div className="mx-auto w-full max-w-lg flex-1 px-6 py-12">
-        <Link href="/" className="inline-block" aria-label={BRAND.name}>
-          <BrandLogo className="h-9 w-auto object-contain" />
-        </Link>
+        {/* The logo alone used to be the whole header. On a phone the map's
+            tab bar is the only account menu in the app, and it does not
+            follow you here — so theme and sign out were unreachable from any
+            content page. Same pair as the map header, same component. */}
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" className="inline-block" aria-label={BRAND.name}>
+            <BrandLogo className="h-9 w-auto object-contain" />
+          </Link>
+
+          <SignInIcons />
+        </div>
 
         <h1 className="mt-16 text-3xl font-medium tracking-tight">Contact</h1>
         <p className="mt-2 text-tone-0/55">

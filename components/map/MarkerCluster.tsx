@@ -29,7 +29,6 @@ type JamCardMarkerProps = {
 };
 import { X } from 'lucide-react';
 
-import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MapMarkersCluster() {
   const map = useMap();
@@ -327,39 +326,55 @@ export function JamCardMarker({
 
 const tags = ['blues', 'rap'];
 
+/**
+ * Placeholder for JamCardMarker while its details are fetched.
+ *
+ * The blocks are explicit greys, not the `Skeleton` default. That default is
+ * `bg-accent`, a theme token that on most of the themes here lands about as
+ * light as this card's own `bg-neutral-50` — so the skeleton rendered as a
+ * blank white rectangle and read as a bug rather than as loading. The card
+ * is hardcoded light in JamCardMarker too, so hardcoded greys is the
+ * consistent choice; a theme token would have to track that card, not the
+ * page around it.
+ *
+ * Same box, same positioning and the same run of rows as the real card, so
+ * nothing jumps when the data lands.
+ */
 export function CardSkeleton() {
   return (
     <Card
-      className="flex flex-col max-w-[90%] w-80 overflow-hidden rounded-lg sm:rounded-2xl  bg-neutral-50 shadow-md absolute top-1/2 
-    right-1/2 translate-x-1/2 -translate-y-1/2 lg:translate-x-0 lg:-translate-y-0 lg:top-4 lg:right-4 z-[401]"
+      className="absolute top-1/2 right-1/2 z-[401] flex w-80 max-w-[90%] translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border-none bg-neutral-50 shadow-2xl sm:rounded-2xl lg:top-4 lg:right-4 lg:translate-x-0 lg:translate-y-0"
     >
-      {/* 1. Image Container - Matches h-52 and relative for tags */}
+      {/* Image, h-52 to match */}
       <div className="relative h-52 w-full">
-        <Skeleton className="h-full w-full rounded-none" />
+        <div className="h-full w-full animate-pulse bg-neutral-200" />
 
-        {/* Floating Tags Placeholder */}
+        {/* The two style tags that float over the image */}
         <div className="absolute bottom-3 left-3 flex gap-1.5">
-          <Skeleton className="h-5 w-12 rounded-xs bg-white/30" />
-          <Skeleton className="h-5 w-12 rounded-xs bg-white/30" />
+          <div className="h-5 w-14 animate-pulse rounded-xs bg-neutral-300" />
+          <div className="h-5 w-14 animate-pulse rounded-xs bg-neutral-300" />
         </div>
       </div>
 
-      {/* 2. Content Area - Matches p-5 */}
       <CardContent className="p-5">
-        {/* Title Placeholder */}
-        <div className="space-y-2">
-          <Skeleton className="h-5 w-full" />
+        {/* Title */}
+        <div className="h-5 w-3/4 animate-pulse rounded bg-neutral-200" />
+
+        {/* location_title, location_address */}
+        <div className="mt-3 space-y-2">
+          <div className="h-3.5 w-2/3 animate-pulse rounded bg-neutral-200" />
+          <div className="h-3 w-1/2 animate-pulse rounded bg-neutral-200" />
         </div>
 
-        {/* Location Info Placeholder */}
-        <div className="mt-4 space-y-2">
-          <Skeleton className="h-3 w-2/3" /> {/* location_title */}
-          <Skeleton className="h-3 w-1/2" /> {/* location_address */}
+        {/* The dated row: calendar glyph plus display_date */}
+        <div className="mt-4 flex items-center gap-1.5">
+          <div className="size-3.5 animate-pulse rounded bg-neutral-200" />
+          <div className="h-3 w-32 animate-pulse rounded bg-neutral-200" />
         </div>
 
-        {/* Footer Placeholder */}
-        <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-3">
-          <Skeleton className="h-3 w-20" /> {/* "View Details" text */}
+        {/* "View Details" */}
+        <div className="mt-3 pt-3">
+          <div className="h-3 w-20 animate-pulse rounded bg-neutral-300" />
         </div>
       </CardContent>
     </Card>

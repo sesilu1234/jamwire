@@ -10,6 +10,36 @@ import type { RecentJam } from '@/lib/getRecentJams';
  * A horizontal scroller rather than a grid: the point is freshness, not
  * completeness, so it shouldn't claim a whole screen of vertical space.
  */
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/**
+ * Formats a date-only `nextDate` ("2026-10-04") as "Sun 4 Oct".
+ *
+ * Written out by hand rather than with toLocaleDateString, which broke
+ * hydration twice over. First the locale: passing `undefined` let the server
+ * format in its locale and the browser in the visitor's, so "Sun, 4 Oct" met
+ * "dom, 4 oct". Pinning it to en-GB was not enough either, because Node and
+ * Chrome ship different ICU data — Node renders "Sun, 4 Oct" and Chrome
+ * "Sun 4 Oct" from the very same options. Any Intl call here is a hydration
+ * mismatch waiting for the next Node upgrade.
+ *
+ * The value carries no time and no zone, so it is read back as UTC: parsed
+ * as local time, a date-only string lands on the previous day for every
+ * visitor west of UTC. This is the calendar date the host chose, printed the
+ * same everywhere. The jam's actual local start time is a separate field
+ * (`display_date`) and is not touched here.
+ */
+function formatJamDate(nextDate: string) {
+  const [y, m, d] = nextDate.slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return '';
+  const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `${weekday} ${d} ${MONTHS[m - 1]}`;
+}
+
 export default function NewJams({ jams }: { jams: RecentJam[] }) {
   // Nothing new and upcoming is a normal state on a quiet week — show nothing
   // rather than an empty shelf.
@@ -65,11 +95,7 @@ export default function NewJams({ jams }: { jams: RecentJam[] }) {
                     </p>
                   ) : null}
                   <p className="mt-2 text-xs font-medium tabular-nums text-tone-1/50">
-                    {new Date(jam.nextDate).toLocaleDateString(undefined, {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short',
-                    })}
+                    {formatJamDate(jam.nextDate)}
                   </p>
                 </div>
               </Link>

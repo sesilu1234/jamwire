@@ -20,9 +20,20 @@ export async function GET(request: Request) {
 
   if (!placeId) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
-  // 1. Light Rate Limit check
-  const { success } = await ratelimit.limit(ip);
-  if (!success) return NextResponse.json({ error: "Too many clicks" }, { status: 429 });
+  // 1. Light Rate Limit check.
+  // Fail open, the way /api/public/places already does. Upstash throws when
+  // UPSTASH_REDIS_REST_URL/_TOKEN are unset, and this call was the only one
+  // in the file not guarded — so with no Redis configured the handler
+  // rejected and Next answered 500 with an empty body. The caller then blew
+  // up on res.json() with "Unexpected end of JSON input", swallowed it, and
+  // picking a city silently did nothing.
+  try {
+    const { success } = await ratelimit.limit(ip);
+    if (!success)
+      return NextResponse.json({ error: "Too many clicks" }, { status: 429 });
+  } catch (e) {
+    console.error("Ratelimit bypass", e, ip);
+  }
 
   // 2. Cache Check (Save $$$)
   try {
@@ -51,8 +62,13 @@ export async function GET(request: Request) {
       address: data.result.formatted_address
     };
 
-    // 4. Cache forever
-    await redis.set(`detail:${placeId}`, JSON.stringify(result));
+    // 4. Cache forever. Also guarded: a cache write failing is not a
+    // reason to fail a lookup that has already succeeded.
+    try {
+      await redis.set(`detail:${placeId}`, JSON.stringify(result));
+    } catch (e) {
+      console.error("Cache write error", e);
+    }
 
     return NextResponse.json(result);
   } catch (e) {
