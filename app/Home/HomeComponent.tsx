@@ -8,7 +8,7 @@ import GooglePlacesSearch from '@/components/map/GooglePlacesSearch';
 import GooglePlacesSearchServer from './GooglePlacesSearchServer';
 import JamCarousel from './jamsCarousel';
 import { Input } from '@/components/ui/input';
-import { Menu, Compass, Building2, PlusCircle, CircleHelp } from 'lucide-react';
+import { Compass, Building2, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import SignInIcons from '@/components/map/SingInIcons';
 import Filtro from '@/components/map/Filtro';
@@ -42,26 +42,39 @@ export default function HomeComponent({
     <div className="flex flex-col min-h-screen ">
       <MapProvider initialUserLocation={userLocation} resCards={cards}>
         {/* Phone: full-bleed map shell. From md: the original centered page. */}
-        <div className="relative flex flex-col w-full px-2 pt-16 md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0 mt-4">
+        <div className="relative flex flex-col w-full px-2 pt-[var(--phone-topbar-h)] md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0 md:mt-4">
           {/* ── Header: one bar ──────────────────────────────────────────
               Logo, search, filter and avatar on a single row. The search
               input and <Filtro> are single instances repositioned by CSS,
               never duplicated: a second <Filtro> would re-run its
               locationSearch effect and fire the jams fetch twice on every
               search, racing setJams against itself.
-              On phone the controls become a fixed top bar and the logo and
-              avatar drop out — the avatar lives in the bottom tab bar. */}
+              On phone the controls become a fixed top bar: the wordmark is
+              replaced by the square mark and the avatar drops out, because
+              the account menu is a cell of the bottom tab bar. */}
           <div className="md:flex md:flex-wrap md:items-center md:gap-3 md:px-4 md:py-3 md:mb-4">
             <div className="hidden md:flex md:items-center md:order-1">
               <BrandLogo className="max-h-10 max-w-50 w-auto h-auto object-contain" />
             </div>
 
             <div
-              className="fixed top-0 inset-x-0 z-[900] flex items-center gap-2 px-2 py-2
+              className="fixed top-0 inset-x-0 z-[900] flex h-[var(--phone-topbar-h)] items-center gap-2 px-2 py-2
                          bg-tone-5/95 backdrop-blur border-b border-tone-3/40
-                         md:static md:z-auto md:bg-transparent md:backdrop-blur-none
+                         md:static md:z-auto md:h-auto md:bg-transparent md:backdrop-blur-none
                          md:border-0 md:px-0 md:py-0 md:order-2 md:w-auto"
             >
+              {/* Phone only. The wordmark above is md:flex, so on a phone
+                  nothing on screen said whose site this was. The square mark
+                  costs 40px of a row that still has to hold a search input —
+                  the wordmark is 876x191 and would have taken half of it. */}
+              <Link
+                href="/"
+                aria-label={BRAND.name}
+                className="shrink-0 md:hidden"
+              >
+                <BrandLogo mark className="h-10 w-10 object-contain" />
+              </Link>
+
               <div className="flex-1 min-w-0 md:w-52 md:flex-none">
                 <GooglePlacesSearchServer />
               </div>
@@ -97,8 +110,10 @@ export default function HomeComponent({
             )}
           </div>
 
-          {/* Phone: viewport minus the top bar (4rem) and tab bar (4rem). */}
-          <div className="relative w-full mx-auto h-[calc(100dvh-8rem)] rounded-lg md:mt-2 md:h-148 md:rounded-sm shadow-md overflow-hidden">
+          {/* Phone: exactly the gap between the two fixed bars. It used to be
+              100dvh-8rem while starting 5rem down, so the bottom of the map —
+              and the cards anchored to it — was clipped by the tab bar. */}
+          <div className="relative w-full mx-auto h-[calc(100dvh-var(--phone-topbar-h)-var(--phone-tabbar-h))] rounded-lg md:mt-2 md:h-148 md:rounded-sm shadow-md overflow-hidden">
             <MapRender />
             <JamCarousel
               jams={jams}
@@ -159,9 +174,15 @@ export default function HomeComponent({
 
       <SiteFooter className="hidden md:block" />
 
-      {/* Phone-only tab bar. Desktop keeps the header nav + footer links. */}
+      {/* Phone-only tab bar. Desktop keeps the header nav + footer links.
+
+          The fourth cell is the account menu, not Help. The header avatar is
+          md:block and the footer is md:block too, so on a phone there was no
+          way to sign in, sign out or change the theme at all. Help and About
+          moved inside that menu: a tab bar is for going places, and those two
+          are read once. */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-[900] h-16 flex items-stretch
+        className="md:hidden fixed bottom-0 inset-x-0 z-[900] h-[var(--phone-tabbar-h)] flex items-stretch
                    bg-tone-5/95 backdrop-blur border-t border-tone-3/40"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
@@ -169,7 +190,6 @@ export default function HomeComponent({
           { href: '/', label: 'Explore', Icon: Compass, active: true },
           { href: '/cities', label: 'Cities', Icon: Building2, active: false },
           { href: '/host', label: 'Add spot', Icon: PlusCircle, active: false },
-          { href: '/help', label: 'Help', Icon: CircleHelp, active: false },
         ].map(({ href, label, Icon, active }) => (
           <Link
             key={href}
@@ -182,6 +202,8 @@ export default function HomeComponent({
             {label}
           </Link>
         ))}
+
+        <SignInIcons compact />
       </nav>
     </div>
   );

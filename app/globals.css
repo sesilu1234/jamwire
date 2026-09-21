@@ -672,6 +672,21 @@
   --destructive: var(--danger);
 }
 
+/**
+ * Phone map shell.
+ *
+ * The fixed top bar, the map and the fixed tab bar have to add up to exactly
+ * 100dvh. They didn't: the map was 100dvh-8rem but started 5rem down (4rem of
+ * top bar plus a 1rem margin), so its last 1rem — plus the whole home-indicator
+ * inset — sat behind the tab bar, and the cards anchored to the bottom of the
+ * map were clipped with it. Kept as variables so the three places that need
+ * these numbers cannot drift apart again.
+ */
+:root {
+  --phone-topbar-h: 4rem;
+  --phone-tabbar-h: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
