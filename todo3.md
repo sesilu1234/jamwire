@@ -1,19 +1,5 @@
-- las cards quizas mas arriba o en medio ( en movil)
-
-- en movil, en la parte de arriba : lo de filter y serach bar, dar mas espacio y
-  aire que respire ..
-  - en el mapa, pintar un circulo (solo la circunferencia seguramente ) para que
-    el usuario sepa cuanto de lejos esta mirando
-    - quizas en vez de lo de cities poner jams en general, listado (sin mapa)
-      ... o mejorar un poco esa pagina para poder buscar jams directamente (sin
-      mas un directorio de jams, incluso aunque no tengan fecha ...)
-
 - cambiar colores, de bacground digo esencialmente ... dark es muy oscuro y el
   light mode da asco
-
-- mobile view arreglar y ver. y poner el logo en la home de mobile en algun
-  sitio supongo ? y el header modificaarlo un pelin o ? ademas el footer
-  cambiarlo seguramente
 
 - hacer checkeos a vista y manuales de todo de la jam : sobretodo de fechas (
   que fechas se gaaurdan, cuales se borra, el cron job , como se filtra y busca
@@ -27,3 +13,9 @@
   still referenced from table "comment_reports".', hint: null, message: 'update
   or delete on table "comments" violates foreign key constraint
   "comment_reports_comment_id_fkey" on table "comment_reports"' }
+
+- checkear que al crear o editar jam , la citie y country se pongan ( como se
+  pone eso ? por una libreria ?? )
+
+- poner que todas las jaams están validadas jaajajaa, random entre 1 y 3
+  personas, y ademas, random entre 1 mes y 2 meses

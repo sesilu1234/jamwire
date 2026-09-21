@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
-import { LogIn, Mail, Menu, User } from 'lucide-react';
+import { CircleHelp, Info, LogIn, Mail, Menu, User } from 'lucide-react';
 
 import type { Session } from 'next-auth';
 import { signOut } from 'next-auth/react';
@@ -16,6 +16,15 @@ import {
 
 type AvatarCustomProps = {
   session: Session | null;
+};
+
+type DropdownMenuNotSignedInProps = {
+  /**
+   * Render as a cell of the phone tab bar rather than a header button: an
+   * icon over a caption, in the same type as its neighbours, with the menu
+   * opening upwards. See the same prop on DropdownMenuAvatar.
+   */
+  compact?: boolean;
 };
 
 function AvatarCustom({ session }: AvatarCustomProps) {
@@ -64,7 +73,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { contactSchema } from '@/lib/contact';
 
-export default function DropdownMenuNotSignedIn() {
+export default function DropdownMenuNotSignedIn({
+  compact = false,
+}: DropdownMenuNotSignedInProps = {}) {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
@@ -118,25 +129,41 @@ export default function DropdownMenuNotSignedIn() {
   };
 
   return (
-    <div>
+    <div className={compact ? 'flex flex-1 items-stretch' : undefined}>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button
-            aria-label="Menu"
-            className="inline-flex h-12 w-12 cursor-pointer items-center justify-center
-						           rounded border border-transparent bg-tone-0/4 text-tone-1/80
-						           transition-colors select-none 
-						           hover:bg-tone-0/8 hover:text-tone-0
-						           data-[state=open]:bg-tone-0/10 data-[state=open]:text-tone-0
-						           focus-visible:ring-2 focus-visible:ring-tone-0/25 focus-visible:outline-none"
-          >
-            <Menu className="size-6 shrink-0" strokeWidth={1.75} />
-          </button>
+          {compact ? (
+            <button
+              aria-label="Your account"
+              className="flex w-full cursor-pointer flex-col items-center justify-center gap-1
+                         text-[10px] font-semibold tracking-wide text-tone-1/60 uppercase
+                         transition-colors hover:text-tone-0
+                         data-[state=open]:text-tone-0
+                         focus-visible:outline-none"
+            >
+              <User className="size-5" />
+              Account
+            </button>
+          ) : (
+            <button
+              aria-label="Menu"
+              className="inline-flex h-12 w-12 cursor-pointer items-center justify-center
+						             rounded border border-transparent bg-tone-0/4 text-tone-1/80
+						             transition-colors select-none 
+						             hover:bg-tone-0/8 hover:text-tone-0
+						             data-[state=open]:bg-tone-0/10 data-[state=open]:text-tone-0
+						             focus-visible:ring-2 focus-visible:ring-tone-0/25 focus-visible:outline-none"
+            >
+              <Menu className="size-6 shrink-0" strokeWidth={1.75} />
+            </button>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-56 z-[500] bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
+          className="w-56 z-[950] max-h-[70dvh] overflow-y-auto bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
           align="end"
+          side={compact ? 'top' : 'bottom'}
           sideOffset={8}
+          collisionPadding={8}
         >
           <DropdownMenuLabel>Account</DropdownMenuLabel>
           <DropdownMenuGroup>
@@ -161,6 +188,28 @@ export default function DropdownMenuNotSignedIn() {
               Contact
             </DropdownMenuItem>
           </DropdownMenuGroup>
+
+          {/* Phone only — on desktop these live in the site footer, which the
+              phone layout hides in favour of the tab bar. */}
+          {compact && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/help">
+                    <CircleHelp />
+                    Help
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/about">
+                    <Info />
+                    About
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

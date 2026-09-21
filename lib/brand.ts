@@ -28,6 +28,18 @@ export const BRAND = {
   /** Alt text for the logo image. */
   logoAlt: 'Jamwire logo',
   /**
+   * Square logo mark, for places too narrow for the wordmark. `logo` is
+   * 876x191 — on a phone top bar it would eat most of the row the search
+   * input needs, so the phone header uses this instead.
+   *
+   * Its own file rather than `/icon.png`: that URL is already claimed by
+   * app/icon.png, the Next metadata-file convention for the favicon, and a
+   * UI image should not depend on which of the two Next decides to serve.
+   */
+  logoMark: '/jamwire_mark.png',
+  /** Alt text for the square mark. */
+  logoMarkAlt: 'Jamwire',
+  /**
    * Production origin. Still the old domain — the site is served from
    * jamspots.xyz. Change this only once the new domain is live, otherwise
    * the sitemap, canonical URLs and OG images will point at nothing.

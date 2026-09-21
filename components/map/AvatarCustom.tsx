@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
-import { Guitar, LogOut, Mail, User } from 'lucide-react';
+import { CircleHelp, Guitar, Info, LogOut, Mail, User } from 'lucide-react';
 
 import { toast } from 'sonner';
 
@@ -16,28 +16,39 @@ import {
 
 type AvatarCustomProps = {
   session: Session | null;
+  /**
+   * Render as a cell of the phone tab bar rather than a header avatar: a
+   * small round image over a caption, in the same type as its neighbours,
+   * with the menu opening upwards. The phone layout has no header avatar —
+   * this is the only way in to sign out, the theme and the secondary pages.
+   */
+  compact?: boolean;
 };
 
 import { useSession } from 'next-auth/react';
 
 import Image from 'next/image';
 
-function AvatarCustom({ session }: AvatarCustomProps) {
+function AvatarCustom({ session, compact = false }: AvatarCustomProps) {
   const img = session?.user?.image;
+  // Same box in both branches, so the header doesn't shift depending on
+  // whether the account has a picture. These used to be 62px and 64px.
+  const size = compact ? 24 : 48;
+  const box = compact ? 'h-6 w-6' : 'h-12 w-12';
 
   return img ? (
     <Image
       src={img}
       alt="User avatar"
-      width={48}
-      height={48}
-      className="h-12 w-12 rounded-full object-cover ring-1 ring-tone-0/20"
+      width={size}
+      height={size}
+      className={`${box} rounded-full object-cover ring-1 ring-tone-0/20`}
     />
   ) : (
-    // Same 48px box as the image branch. These used to be 62px and 64px, so the
-    // header shifted depending on whether the account had a picture.
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-tone-4 text-tone-0 ring-1 ring-tone-0/20">
-      <User className="size-5" />
+    <div
+      className={`${box} flex items-center justify-center rounded-full bg-tone-4 text-tone-0 ring-1 ring-tone-0/20`}
+    >
+      <User className={compact ? 'size-3.5' : 'size-5'} />
     </div>
   );
 }
@@ -73,7 +84,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 
-export default function DropdownMenuAvatar({ session }: AvatarCustomProps) {
+export default function DropdownMenuAvatar({
+  session,
+  compact = false,
+}: AvatarCustomProps) {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
@@ -147,25 +161,41 @@ useEffect(() => {
 }, [session]);
 
   return (
-    <div>
+    <div className={compact ? 'flex flex-1 items-stretch' : undefined}>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button
-            aria-label="Your account"
-            className="rounded-full transition-transform duration-150 ease-out
-                       hover:scale-105 active:scale-95
-                       data-[state=open]:scale-100 data-[state=open]:hover:scale-100
-                       focus-visible:ring-2 focus-visible:ring-tone-0/25
-                       focus-visible:ring-offset-2 focus-visible:ring-offset-tone-5
-                       focus-visible:outline-none"
-          >
-            <AvatarCustom session={session} />
-          </button>
+          {compact ? (
+            <button
+              aria-label="Your account"
+              className="flex w-full cursor-pointer flex-col items-center justify-center gap-1
+                         text-[10px] font-semibold tracking-wide text-tone-1/60 uppercase
+                         transition-colors hover:text-tone-0
+                         data-[state=open]:text-tone-0
+                         focus-visible:outline-none"
+            >
+              <AvatarCustom session={session} compact />
+              Account
+            </button>
+          ) : (
+            <button
+              aria-label="Your account"
+              className="rounded-full transition-transform duration-150 ease-out
+                         hover:scale-105 active:scale-95
+                         data-[state=open]:scale-100 data-[state=open]:hover:scale-100
+                         focus-visible:ring-2 focus-visible:ring-tone-0/25
+                         focus-visible:ring-offset-2 focus-visible:ring-offset-tone-5
+                         focus-visible:outline-none"
+            >
+              <AvatarCustom session={session} />
+            </button>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-56 z-[500] bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
+          className="w-56 z-[950] max-h-[70dvh] overflow-y-auto bg-surface-raised/75 backdrop-blur-xl backdrop-saturate-150 shadow-xl shadow-black/20"
           align="end"
+          side={compact ? 'top' : 'bottom'}
           sideOffset={8}
+          collisionPadding={8}
         >
           <DropdownMenuLabel>Your account</DropdownMenuLabel>
           <DropdownMenuGroup>
@@ -195,6 +225,29 @@ useEffect(() => {
               Contact
             </DropdownMenuItem>
           </DropdownMenuGroup>
+
+          {/* Phone only. On desktop these live in the site footer, which the
+              phone layout hides in favour of the tab bar — and a tab bar is
+              for going places, not for Help and About. */}
+          {compact && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/help">
+                    <CircleHelp />
+                    Help
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/about">
+                    <Info />
+                    About
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
