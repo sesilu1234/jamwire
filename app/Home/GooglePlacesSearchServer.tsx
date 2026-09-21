@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMapContext } from '@/components/map/MapContext';
 import { Search, X, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function GooglePlacesSearch() {
   const { googleSearchLocation, setGoogleSearchLocation, setLocationSearch, map } = useMapContext();
@@ -56,6 +57,15 @@ const inputRef = useRef<HTMLInputElement>(null);
     try {
       // Fetch details (lat/lng) from your own server API
       const res = await fetch(`/api/public/places-details?placeId=${place.place_id}&token=${sessionToken}`);
+
+      // Check the status before parsing. A 500 from this route arrives with
+      // an empty body, and res.json() on that throws "Unexpected end of JSON
+      // input" — which the catch below turned into a console line and a
+      // search that did nothing at all.
+      if (!res.ok) {
+        throw new Error(`places-details ${res.status}`);
+      }
+
       const coords = await res.json();
 
       if (coords.lat && coords.lng) {
@@ -74,7 +84,15 @@ const inputRef = useRef<HTMLInputElement>(null);
         // Refresh token for the NEXT session
         setSessionToken(self.crypto.randomUUID());
       }
-    } catch (e) { console.error("Details error:", e); }
+    } catch (e) {
+      console.error("Details error:", e);
+      // Put the query back so the box doesn't sit there showing a city the
+      // map never moved to.
+      searchReady.current = true;
+      toast.error("Couldn't open that place", {
+        description: 'Try again in a moment.',
+      });
+    }
   };
 
   const handleClear = () => {

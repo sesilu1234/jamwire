@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { BRAND } from '@/lib/brand';
 import BrandLogo from '@/components/BrandLogo';
 import SiteFooter from '@/components/SiteFooter';
+import SignInIcons from '@/components/map/SingInIcons';
 
 export const metadata: Metadata = {
   title: 'Help / FAQ',
@@ -55,9 +56,17 @@ export default function Help() {
   return (
     <div className="flex min-h-screen flex-col bg-tone-5 text-tone-0">
       <div className="mx-auto w-full max-w-xl flex-1 px-6 py-12">
-        <Link href="/" className="inline-block" aria-label={BRAND.name}>
-          <BrandLogo className="h-9 w-auto object-contain" />
-        </Link>
+        {/* The logo alone used to be the whole header. On a phone the map's
+            tab bar is the only account menu in the app, and it does not
+            follow you here — so theme and sign out were unreachable from any
+            content page. Same pair as the map header, same component. */}
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" className="inline-block" aria-label={BRAND.name}>
+            <BrandLogo className="h-9 w-auto object-contain" />
+          </Link>
+
+          <SignInIcons />
+        </div>
 
         <h1 className="mt-16 text-3xl font-medium tracking-tight">FAQ</h1>
         <p className="mt-2 text-tone-0/55">

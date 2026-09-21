@@ -1,6 +1,7 @@
 // components/MapComponent.tsx
 "use client";
 import {
+	AttributionControl,
 	MapContainer,
 	TileLayer,
 	Marker,
@@ -162,7 +163,16 @@ export default function MapComponent() {
 			center={[40.4168, -3.7038]}
 			zoom={5}
 			style={{ height: "100%", width: "100%" }}
+			attributionControl={false}
 		>
+			{/* The default control prints Leaflet's own prefix — the word
+			    "Leaflet" and a Ukraine flag — ahead of the credits. That prefix
+			    is Leaflet's branding and is optional; the Stadia, OpenMapTiles
+			    and OpenStreetMap credits are a licence condition and stay.
+			    Hence the default control off and this one back with no prefix;
+			    globals.css shrinks what is left on a phone. */}
+			<AttributionControl position="bottomright" prefix={false} />
+
 			<SetMap />
 
 			<MapTileSwitcher selectedIndex={0} />

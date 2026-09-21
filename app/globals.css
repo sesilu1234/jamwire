@@ -714,14 +714,59 @@
   font-family: 'Space Grotesk', sans-serif;
 }
 /* Para Chrome, Edge, Safari */
-/* Desktop-only custom scrollbars */
+/* Map attribution.
+   Required by the tile licences, so it stays — but it used to be full-size
+   white-on-white at the bottom of the map, and on the phone the sheet below
+   it is now transparent, so it reads as clutter over the cards. Small, quiet
+   and out of the way; still legible and still clickable. */
+.leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.6) !important;
+  padding: 0 4px !important;
+  border-radius: 4px 0 0 0;
+  font-size: 9px !important;
+  line-height: 1.5 !important;
+  color: #4a4a4a !important;
+}
+
+.leaflet-control-attribution a {
+  color: #3b4a5a !important;
+}
+
+@media (max-width: 767px) {
+  /* Phone: only the shortest credit line fits, and it must not sit on the
+     cards. Trimmed to the bare licence requirement and nudged clear. */
+  .leaflet-control-attribution {
+    font-size: 8px !important;
+    max-width: 62vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Desktop-only custom scrollbars.
+   The overflow axes used to be pinned here unconditionally, and because this
+   rule comes after the Tailwind import it beat the utilities on the element:
+   the phone sheet could not scroll sideways in its peek state however it was
+   classed. The axes belong to the utilities now; this file only styles the
+   scrollbar itself. */
 .card-container {
-  overflow-x: hidden; /* prevent horizontal scroll everywhere */
-  overflow-y: auto; /* vertical scroll if needed */
+  /* Phone: the peek strip is swiped, and a bar under a single row of cards is
+     noise — the snap points already say there is more to the right. */
+  scrollbar-width: none;
+}
+
+.card-container::-webkit-scrollbar {
+  display: none;
 }
 
 @media (min-width: 768px) {
+  .card-container {
+    scrollbar-width: thin;
+  }
+
   .card-container::-webkit-scrollbar {
+    display: block;
     width: 12px;
   }
   .card-container::-webkit-scrollbar-track {
@@ -762,5 +807,3 @@
   );
   background-size: 100% 5px;
 }
-
-
