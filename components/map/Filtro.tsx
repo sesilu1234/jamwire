@@ -376,10 +376,18 @@ export default function Filtro({
         <span className="text-sm select-none">Filters</span>
       </button>
 
-      {/* Overlay + Filter Panel */}
+      {/* Overlay + Filter Panel.
+
+          z-[1000], not 503. Leaflet's own panes and controls go up to 800,
+          and neither .leaflet-container nor the map wrapper creates a
+          stacking context, so at 503 the map painted straight over the
+          overlay — most visible on a phone, where the map is the whole
+          screen. The app's fixed bars sit at 900, and a filter panel is
+          modal, so it belongs above those too. Blur raised from 1px, which
+          was not perceptible at any size. */}
       {open && (
-        <div className="fixed inset-0 z-[503] flex flex-col items-center pt-5 
-                  bg-slate-900/40 backdrop-blur-[1px] transition-all duration-300">
+        <div className="fixed inset-0 z-[1000] flex flex-col items-center pt-5 
+                  bg-slate-900/50 backdrop-blur-[3px] transition-all duration-300">
           <div className="relative w-[92%] md:w-xl">
             <div
               ref={panelRef_1}

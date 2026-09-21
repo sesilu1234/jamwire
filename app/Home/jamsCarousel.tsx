@@ -146,6 +146,7 @@ export default function JamCarousel({
         { '--sheet-h': `${dragH ?? stops[snap]}px` } as React.CSSProperties
       }
       className={`group/sheet absolute inset-x-0 bottom-0 z-50 flex h-[var(--sheet-h)] flex-col overflow-hidden rounded-t-2xl border-x-0 border-b-0 border-t border-tone-0/10 bg-surface-inset/62 shadow-[0_-8px_24px_rgba(0,0,0,0.28)] backdrop-blur-[2px] backdrop-saturate-[0.7]
+        ${searchType === 'global' ? 'max-md:hidden' : ''}
         data-[snap=peek]:overflow-visible data-[snap=peek]:border-t-transparent data-[snap=peek]:bg-transparent data-[snap=peek]:shadow-none data-[snap=peek]:backdrop-filter-none
         ${dragging ? '' : 'transition-[height] duration-300 ease-out'}
         md:inset-auto md:top-8 md:left-18 md:h-auto md:max-w-[95%] md:gap-1 md:overflow-visible md:rounded-none md:border-0 md:bg-transparent md:shadow-none md:backdrop-filter-none`}
@@ -220,7 +221,7 @@ export default function JamCarousel({
       <div
         ref={listRef}
         className={`card-container flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto px-4 pb-4
-          max-md:group-data-[snap=peek]/sheet:flex-row max-md:group-data-[snap=peek]/sheet:snap-x max-md:group-data-[snap=peek]/sheet:snap-mandatory max-md:group-data-[snap=peek]/sheet:gap-3 max-md:group-data-[snap=peek]/sheet:overflow-x-auto max-md:group-data-[snap=peek]/sheet:overflow-y-hidden max-md:group-data-[snap=peek]/sheet:px-3 max-md:group-data-[snap=peek]/sheet:pt-2 max-md:group-data-[snap=peek]/sheet:pb-6
+          max-md:group-data-[snap=peek]/sheet:flex-row max-md:group-data-[snap=peek]/sheet:snap-x max-md:group-data-[snap=peek]/sheet:snap-proximity max-md:group-data-[snap=peek]/sheet:scroll-px-3 max-md:group-data-[snap=peek]/sheet:gap-3 max-md:group-data-[snap=peek]/sheet:overflow-x-auto max-md:group-data-[snap=peek]/sheet:overflow-y-hidden max-md:group-data-[snap=peek]/sheet:px-3 max-md:group-data-[snap=peek]/sheet:pt-2 max-md:group-data-[snap=peek]/sheet:pb-6
           md:flex-none md:gap-6 md:rounded-b-xl md:border md:border-black/20 md:bg-tone-3/45 md:transition-all md:duration-700 md:ease-in-out ${
             collapsed
               ? 'md:max-h-0 md:px-0 md:pt-0 md:pb-0 md:opacity-0'

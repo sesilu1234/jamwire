@@ -43,7 +43,7 @@ export default function HomeComponent({
   const [searchType, setSearchType] = useState<'local' | 'global'>('local');
 
   return (
-    <div className="flex flex-col min-h-screen ">
+    <div className="flex flex-col min-h-dvh ">
       <MapProvider
         initialUserLocation={userLocation}
         resCards={cards}
