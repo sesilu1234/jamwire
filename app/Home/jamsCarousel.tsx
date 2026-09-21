@@ -248,7 +248,7 @@ export default function JamCarousel({
               Cards not available with global search
             </div>
           ) : (
-            <div className="animate-fadeIn mx-auto flex w-full max-w-sm shrink-0 flex-col items-center justify-center p-4 text-center md:p-8">
+            <div className="animate-fadeIn mx-auto flex w-full max-w-sm shrink-0 flex-col items-center justify-center p-4 text-center max-md:group-data-[snap=peek]/sheet:hidden md:p-8">
               <h3 className="mb-2 text-lg font-bold tracking-tight uppercase">
                 No active jam sessions found here right now
               </h3>

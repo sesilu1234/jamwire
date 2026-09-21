@@ -751,8 +751,9 @@
    classed. The axes belong to the utilities now; this file only styles the
    scrollbar itself. */
 .card-container {
-  /* Phone: the peek strip is swiped, and a bar under a single row of cards is
-     noise — the snap points already say there is more to the right. */
+  /* Phone: the peek strip is swiped, and a scrollbar under a single row of
+     cards is noise. The scroll itself is plain and native — no snapping, no
+     scroll-behavior, nothing that fights the finger. */
   scrollbar-width: none;
 }
 

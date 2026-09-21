@@ -42,6 +42,32 @@ export default function HomeComponent({
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<'local' | 'global'>('local');
 
+  // The phone layout is a fixed shell — top bar, a map sized to the gap, tab
+  // bar — that should add up to the viewport exactly. It still scrolled on a
+  // real phone: the URL bar appearing and disappearing moves the goalposts
+  // mid-layout, and browsers allow a rubber-band drag either way. Headless
+  // has no URL bar, so no amount of measuring here reproduced it. Locking the
+  // document is the fix that does not depend on getting that sum exactly
+  // right. Desktop is untouched — that page is meant to scroll.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => {
+      const lock = mq.matches;
+      document.documentElement.style.overflow = lock ? 'hidden' : '';
+      document.body.style.overflow = lock ? 'hidden' : '';
+      document.body.style.overscrollBehavior = lock ? 'none' : '';
+    };
+    apply();
+    mq.addEventListener('change', apply);
+    return () => {
+      mq.removeEventListener('change', apply);
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
+    };
+  }, []);
+
+
   return (
     <div className="flex flex-col min-h-dvh ">
       <MapProvider
