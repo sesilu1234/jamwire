@@ -69,6 +69,13 @@ export default function MapMarkersCluster() {
 
     // @ts-expect-error makerExists
     const clusterGroup = L.markerClusterGroup({
+      // markercluster defaults this to true: it only keeps markers near the
+      // current view in the DOM, and drops the rest. That is a performance
+      // trade for tens of thousands of pins — this map has about 50, so it
+      // buys nothing and is why a global search showed Europe but not
+      // Australia, or the USA, depending on where the map happened to sit.
+      removeOutsideVisibleBounds: false,
+      chunkedLoading: true,
       // @ts-expect-error makerExists
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();

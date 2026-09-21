@@ -39,7 +39,7 @@ export default function HomeComponent({
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<'local' | 'global'>('local');
   return (
-    <div className="flex flex-col min-h-screen ">
+    <div className="flex flex-col min-h-dvh ">
       <MapProvider initialUserLocation={userLocation} resCards={cards}>
         {/* Phone: full-bleed map shell. From md: the original centered page. */}
         <div className="relative flex flex-col w-full px-2 pt-[var(--phone-topbar-h)] md:w-[1300px] md:max-w-[90%] md:mx-auto md:px-0 md:pt-0 md:mt-4">
