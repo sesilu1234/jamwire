@@ -1,6 +1,3 @@
-- cambiar colores, de bacground digo esencialmente ... dark es muy oscuro y el
-  light mode da asco
-
 - hacer checkeos a vista y manuales de todo de la jam : sobretodo de fechas (
   que fechas se gaaurdan, cuales se borra, el cron job , como se filtra y busca
   , si cambio edit una jam de manual a weekly que pasa...se guardaan fechas
@@ -19,6 +16,11 @@
 
 - poner que todas las jaams están validadas jaajajaa, random entre 1 y 3
   personas, y ademas, random entre 1 mes y 2 meses
+
+  -como hacerlo pro, que no me roben app, ganar dinero en futuro , y como
+  anunciar .... y como ve la app la IA y que propescto jajaa
+
+## done
 
 ---
 
