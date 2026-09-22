@@ -7,7 +7,7 @@ import { BRAND } from '@/lib/brand';
  */
 export const metadata: Metadata = {
   title: 'Contact',
-  description: `Tell us about a jam session or open mic that's missing from ${BRAND.name}, report wrong details, or just say hi.`,
+  description: `Claim a jam session or open mic you host on ${BRAND.name}, report wrong details, or tell us something's broken.`,
 };
 
 export default function ContactLayout({

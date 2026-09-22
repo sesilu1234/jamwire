@@ -23,14 +23,3 @@
 ---
 
 ---
-
-- global search las cards se escondan un poco mas en movil , porque molesta
-- en global search no se cargan TODAS en el mapa... australia ahora no carga, y
-  antes USA
-
-- scroll de cards , mmm ,va un pelin buggeao
-
-- se puede hacer scroll de la home en mobile lol ,eso estaa mal
-- ahhh y otro issue , no se si se puede hacer algo sin joder nada : en mobile ,
-  al pulsar filtros , no se difumina mana ni cards, o eso me parece a mi ....
-  (en pc diría que sí)
