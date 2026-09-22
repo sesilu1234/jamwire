@@ -111,8 +111,8 @@ export default function Contact() {
 
         <h1 className="mt-16 text-3xl font-medium tracking-tight">Contact</h1>
         <p className="mt-2 text-tone-0/55">
-          A jam that&apos;s missing, details that are wrong, or something
-          broken. Send it here.
+          Claim a jam you host, report wrong details, or tell us
+          something&apos;s broken.
         </p>
 
         {/* Brand rule — the one bit of colour on the page, tying it to the

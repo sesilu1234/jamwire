@@ -145,27 +145,31 @@
   /* -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
   -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
   -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-# */
-  --tone-6: oklch(98.5% 0.001 106.423); /* highest / lightest */
-  --tone-5: oklch(92.3% 0.003 48.717);
-  --tone-4: oklch(70.9% 0.01 56.259);
-  --tone-3: oklch(71.002% 0.00789 80.616);
+  /* Crisp white: a near-white page with a paper grain (see `.light body`
+     below), white cards on top. Only the page and surface steps are new;
+     the text steps 0–2 are unchanged. */
+  --tone-6: oklch(100% 0 0); /* highest / lightest */
+  --tone-5: oklch(99% 0 0);
+  --tone-4: oklch(90% 0 0);
+  --tone-3: oklch(77% 0 0);
   --tone-2: oklch(26.8% 0.007 34.298);
   --tone-1: oklch(21% 0.006 285.885);
   --tone-0: oklch(14.7% 0.004 49.25); /* lowest / darkest */
 
-  --card-jams: oklch(100% 0.00011 271.152);
-  --collapse-butt: #413d3d;
+  --card-jams: oklch(100% 0 0);
+  --collapse-butt: oklch(30% 0.01 250);
 
-  /* Same hues as the dark themes, darkened: #5DCAA5 and #C596FF are
-     chosen against a dark page and fall below readable contrast on white. */
-  --text-tone-modality-jam: oklch(58% 0.11 165);
+  /* Same hues as the dark themes, a step darker: #5DCAA5 and #C596FF are
+     chosen against a dark page and wash out on white. Kept as bright as
+     that allows so the tags still pop, including over card photos. */
+  --text-tone-modality-jam: oklch(68% 0.15 165);
 
   /* Royal Amethyst - Rich, sophisticated purple */
-  --text-tone-modality-open-mic: oklch(52% 0.18 300);
+  --text-tone-modality-open-mic: oklch(62% 0.2 300);
 
   /* In Light mode, we use a subtle soft shadow instead of a "neon" glow */
-  --neon-glow-jam: 0 1px 2px oklch(58% 0.11 165 / 0.2);
-  --neon-glow-mic: 0 1px 2px oklch(52% 0.18 300 / 0.2);
+  --neon-glow-jam: 0 1px 2px oklch(68% 0.15 165 / 0.2);
+  --neon-glow-mic: 0 1px 2px oklch(62% 0.2 300 / 0.2);
 
   --primary-1: oklch(52% 0.14 250);
   --secondary-1: oklch(80.7% 0.333 95);
@@ -178,8 +182,8 @@
      control recessed into that panel. Defined per theme because the
      direction flips: light themes raise towards white, dark themes
      raise towards grey while the page stays put. */
-  --surface-raised: oklch(99.5% 0.001 106.423);
-  --surface-inset: oklch(96.5% 0.002 48.717);
+  --surface-raised: oklch(100% 0 0);
+  --surface-inset: oklch(96.5% 0 0);
 
   /* --- shadcn semantic tokens, mapped onto this theme's tone scale ---------
      These ship from shadcn as fixed greys, and every theme block below was
@@ -206,6 +210,16 @@
   --primary: var(--tone-0);
   --primary-foreground: var(--tone-6);
   --destructive: var(--danger);
+}
+
+/* Light theme paper grain. Painted on the page — the body and every
+   `bg-tone-5` page wrapper (jam, about, privacy, contact, help) — never on
+   cards, so panels read as clean sheets on a printed page. Fixed so the
+   grain does not scroll with the content and seam between wrappers. */
+.light body,
+.light .bg-tone-5 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.18  0 0 0 0 0.15  0 0 0 0.32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
 }
 
 .slate {
