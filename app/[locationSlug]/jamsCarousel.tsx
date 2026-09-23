@@ -204,7 +204,7 @@ export default function JamCarousel({
         type="button"
         onClick={() => setCollapsed(!collapsed)}
         aria-expanded={!collapsed}
-        className={`hidden cursor-pointer items-center justify-between gap-3 border border-tone-0/10 bg-surface-raised/90 px-4 py-2.5 backdrop-blur-md transition-colors hover:bg-surface-raised md:flex ${
+        className={`hidden cursor-pointer items-center justify-between gap-3 border border-tone-0/10 bg-surface-raised/90 px-4 py-2.5 backdrop-blur-md transition-colors hover:bg-surface-raised light:border-tone-0/12 light:bg-surface-inset/95 light:hover:bg-surface-inset md:flex ${
           collapsed ? 'rounded-xl' : 'rounded-t-xl border-b-0'
         }`}
       >

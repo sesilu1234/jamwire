@@ -92,7 +92,7 @@ const PlaceAutocomplete = () => {
         placeholder="Search a location..."
         className="
           w-full h-12 pl-10 pr-10 text-sm
-          bg-tone-4/60 text-tone-1
+          bg-tone-4/60 light:border-tone-0/14 light:bg-surface-inset light:shadow-[inset_0_2px_4px_rgba(0,0,0,0.07)] text-tone-1
           placeholder:text-tone-1/60
           border border-tone-3 rounded
           focus:outline-none focus:ring-2 focus:ring-primary
