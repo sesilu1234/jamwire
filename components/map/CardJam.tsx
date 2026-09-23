@@ -111,7 +111,7 @@ export default function JamCard({
             // photo, and the modality colours are tuned as text on the theme
             // background, not as backgrounds themselves.
             <span
-              className="absolute top-2.5 right-2.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase shadow backdrop-blur-sm max-md:group-data-[snap=peek]/sheet:top-auto max-md:group-data-[snap=peek]/sheet:right-auto max-md:group-data-[snap=peek]/sheet:bottom-0.5 max-md:group-data-[snap=peek]/sheet:left-0.5 max-md:group-data-[snap=peek]/sheet:px-1 max-md:group-data-[snap=peek]/sheet:text-[8px]"
+              className="absolute top-2.5 right-2.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase shadow backdrop-blur-sm max-md:group-data-[snap=peek]/sheet:top-auto max-md:group-data-[snap=peek]/sheet:right-auto max-md:group-data-[snap=peek]/sheet:bottom-0.5 max-md:group-data-[snap=peek]/sheet:left-2 max-md:group-data-[snap=peek]/sheet:px-1 max-md:group-data-[snap=peek]/sheet:text-[8px]"
               style={{ color: accent }}
             >
               {leadTag}
