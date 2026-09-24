@@ -20,6 +20,10 @@
   -como hacerlo pro, que no me roben app, ganar dinero en futuro , y como
   anunciar .... y como ve la app la IA y que propescto jajaa
 
+  -que todo esté en ingles y tal...
+
+  -reducir tamaño fotos, porque supongo mejora velcoidad ?
+
 ## done
 
 ---

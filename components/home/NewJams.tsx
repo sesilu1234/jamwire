@@ -7,8 +7,7 @@ import type { RecentJam } from '@/lib/getRecentJams';
  * "New on Jamwire" — the most recently added spots that still have a date
  * ahead of them.
  *
- * A horizontal scroller rather than a grid: the point is freshness, not
- * completeness, so it shouldn't claim a whole screen of vertical space.
+ * Three cards and no more: the point is freshness, not completeness.
  */
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -61,26 +60,37 @@ export default function NewJams({ jams }: { jams: RecentJam[] }) {
           </Link>
         </div>
 
-        <ul className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:thin]">
+        <ul className="flex flex-wrap gap-4">
           {jams.map((jam) => (
-            <li key={jam.id} className="w-56 shrink-0">
+            <li key={jam.id} className="w-60">
               <Link
                 href={`/jam/${jam.slug}`}
                 className="group block overflow-hidden rounded-xl border border-tone-0/10 bg-surface-raised transition-colors hover:border-tone-0/25"
               >
-                <div className="relative h-28 w-full overflow-hidden bg-tone-4/40">
+                <div className="relative h-32 w-full overflow-hidden bg-tone-4/40">
                   {jam.image ? (
                     <Image
                       src={jam.image}
                       alt=""
                       fill
-                      sizes="224px"
+                      sizes="240px"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : null}
-                  {jam.modality ? (
-                    <span className="absolute top-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white uppercase backdrop-blur-sm">
-                      {jam.modality === 'open_mic' ? 'Open mic' : 'Jam'}
+                  {jam.style ? (
+                    // Same badge as the map card: the lead style as the label,
+                    // the modality as its colour. Spelling out "Jam" here was
+                    // saying twice over what the colour already says.
+                    <span
+                      className="absolute top-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase shadow backdrop-blur-sm"
+                      style={{
+                        color:
+                          jam.modality === 'open_mic'
+                            ? 'var(--text-tone-modality-open-mic)'
+                            : 'var(--text-tone-modality-jam)',
+                      }}
+                    >
+                      {jam.style}
                     </span>
                   ) : null}
                 </div>
