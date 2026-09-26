@@ -182,10 +182,23 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
     payload.append('jamColumns', JSON.stringify(jamData));
     images_files.forEach((file) => payload.append('images', file));
 
-    await fetch(`/api/private/update-session/${id}`, {
+    const res = await fetch(`/api/private/update-session/${id}`, {
       method: 'POST',
       body: payload, // ⬅️ solo FormData
     });
+
+    /**
+     * The response used to be thrown away, so a rejected save still showed the
+     * success toast and navigated away. The server turns photos down now, so
+     * that silence had to go.
+     */
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      return {
+        success: false,
+        message: body?.error ?? 'Your changes could not be saved.',
+      };
+    }
 
     return { success: true };
   };
@@ -251,7 +264,8 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
               setProgress(13);
               setSaving(true);
 
-              const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+              const wait = (ms: number) =>
+                new Promise((r) => setTimeout(r, ms));
 
               // run progress animation in parallel with save
               const savePromise = handleSave(); // run but capture result

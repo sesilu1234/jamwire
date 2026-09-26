@@ -11,7 +11,18 @@ import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import { toast } from 'sonner';
+
 import { Card, CardTitle } from './ui';
+
+/**
+ * Mirrors MAX_INPUT_BYTES in lib/upload-photos.ts. Keep the two in step: this
+ * one is the courtesy, that one is the rule.
+ */
+const MAX_FILE_MB = 8;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+
+const asMb = (bytes: number) => (bytes / 1024 / 1024).toFixed(1);
 
 interface SortablePhotoProps {
   url: string;
@@ -86,14 +97,34 @@ export default function PhotoUploader({
   function handleFile(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
 
-    const newImages = Array.from(e.target.files).map((file) =>
-      URL.createObjectURL(file),
-    );
-
-    if (!newImages) return;
-
-    setPhotos((prev) => [...prev, ...newImages].slice(0, 4));
+    const picked = Array.from(e.target.files);
     e.target.value = ''; // allow re-upload same file
+
+    /**
+     * The server refuses these too. Stopping them here just saves the host
+     * uploading megabytes before being turned away.
+     */
+    const tooBig = picked.filter((file) => file.size > MAX_FILE_BYTES);
+    const accepted = picked.filter((file) => file.size <= MAX_FILE_BYTES);
+
+    if (tooBig.length === 1) {
+      toast.error('That photo is too large', {
+        description: `${asMb(tooBig[0].size)} MB — photos have to be under ${MAX_FILE_MB} MB.`,
+      });
+    } else if (tooBig.length > 1) {
+      toast.error(`${tooBig.length} photos are too large`, {
+        description: `Photos have to be under ${MAX_FILE_MB} MB each.`,
+      });
+    }
+
+    if (!accepted.length) return;
+
+    setPhotos((prev) =>
+      [...prev, ...accepted.map((file) => URL.createObjectURL(file))].slice(
+        0,
+        4,
+      ),
+    );
   }
 
   function removePhoto(url: string) {

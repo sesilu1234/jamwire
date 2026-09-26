@@ -33,7 +33,42 @@ export type RecentJam = {
  * before the limit is applied, so three rows in means three cards out, and the
  * embedded side is capped at the single earliest date per jam.
  */
-const fetchRecentJams = async (limit = 3): Promise<RecentJam[]> => {
+/**
+ * How many jams the rotation draws from. Wider than the strip so the page has
+ * something different to show on the next hour; narrow enough that everything
+ * in it is still genuinely recent, which is what the heading promises.
+ */
+const POOL_SIZE = 12;
+
+/** Deterministic PRNG, so one hour always produces the same three cards. */
+const mulberry32 = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+/**
+ * Fisher-Yates against a seeded PRNG rather than Math.random: the strip has to
+ * be stable for everyone inside the hour, or two visitors comparing the page -
+ * or one visitor refreshing - would see it flicker.
+ */
+const pickForHour = <T>(items: T[], count: number, hour: number): T[] => {
+  const shuffled = [...items];
+  const random = mulberry32(hour);
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled.slice(0, count);
+};
+
+const fetchRecentJams = async (
+  hour: number,
+  limit = 3,
+): Promise<RecentJam[]> => {
   try {
     /**
      * Frozen for the lifetime of the cache entry below, so a jam can stay on
@@ -51,11 +86,11 @@ const fetchRecentJams = async (limit = 3): Promise<RecentJam[]> => {
       .order('utc_datetime', { referencedTable: 'jam_dates', ascending: true })
       .limit(1, { referencedTable: 'jam_dates' })
       .order('created_at', { ascending: false })
-      .limit(limit);
+      .limit(POOL_SIZE);
 
     if (error) throw error;
 
-    return (data ?? [])
+    const jams = (data ?? [])
       .map((jam) => {
         const next = jam.jam_dates?.[0];
 
@@ -83,6 +118,8 @@ const fetchRecentJams = async (limit = 3): Promise<RecentJam[]> => {
         };
       })
       .filter((jam): jam is RecentJam => Boolean(jam.nextDate && jam.slug));
+
+    return pickForHour(jams, limit, hour);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('getRecentJams failure:', message);
@@ -99,7 +136,16 @@ const fetchRecentJams = async (limit = 3): Promise<RecentJam[]> => {
  * staleness is visible, and the tag is here for the create/update routes to
  * call `revalidateTag('recent-jams')` if that ever stops being true.
  */
-export const getRecentJams = unstable_cache(fetchRecentJams, ['recent-jams'], {
+const getCachedRecentJams = unstable_cache(fetchRecentJams, ['recent-jams'], {
   revalidate: 3600,
   tags: ['recent-jams'],
 });
+
+/**
+ * The hour is passed in rather than read inside, because it is what gives each
+ * hour its own cache entry - arguments are part of the key, the key parts above
+ * are fixed. Without it the rotation would be at the mercy of when the entry
+ * happened to be revalidated.
+ */
+export const getRecentJams = () =>
+  getCachedRecentJams(Math.floor(Date.now() / 3_600_000));
