@@ -34,9 +34,15 @@ export async function placeFromCoords(
   if (!apiKey || !Number.isFinite(lat) || !Number.isFinite(lng)) return EMPTY;
 
   try {
+    /**
+     * Bounded deliberately. This call is decoration - the jam saves fine
+     * without a city - but it used to be able to hold a create request open
+     * for as long as Google felt like taking, and the user just watched the
+     * spinner. An abort here lands in the catch below and returns EMPTY.
+     */
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`,
-      { next: { revalidate: 86400 } },
+      { next: { revalidate: 86400 }, signal: AbortSignal.timeout(6000) },
     );
 
     const data = await response.json();
