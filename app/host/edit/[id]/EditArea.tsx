@@ -47,6 +47,28 @@ const SECTION_META: Record<string, { title: string; hint: string }> = {
   },
 };
 
+/**
+ * Whatever the server said, in a form that can be shown to a person.
+ *
+ * res.json() throws outright on an HTML error page or an empty body, which is
+ * exactly when something has gone wrong and you most want to read the reply.
+ */
+async function describeFailure(res: Response) {
+  const body = await res.text().catch(() => '');
+
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed?.error) return `${res.status}: ${parsed.error}`;
+  } catch {
+    // Not JSON - fall through and show the raw start of the body.
+  }
+
+  const snippet = body.replace(/\s+/g, ' ').trim().slice(0, 300);
+  return snippet
+    ? `${res.status}: ${snippet}`
+    : `${res.status} ${res.statusText}`;
+}
+
 export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
   const setForm = useFormStore((state) => state.setForm);
 
@@ -209,11 +231,9 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
      * that silence had to go.
      */
     if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      return {
-        success: false,
-        message: body?.error ?? 'Your changes could not be saved.',
-      };
+      const message = await describeFailure(res);
+      console.error('update-session failed ->', message);
+      return { success: false, message };
     }
 
     return { success: true };
@@ -288,7 +308,10 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
                   setSaving(false);
                   toast(
                     saveResult?.message ?? 'Your changes could not be saved',
-                    { action: { label: 'Understood', onClick: () => {} } },
+                    {
+                      duration: Infinity,
+                      action: { label: 'Dismiss', onClick: () => {} },
+                    },
                   );
                   return; // only navigate if success
                 }
@@ -307,7 +330,8 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
                 toast('Your changes could not be saved', {
                   description:
                     e instanceof Error ? e.message : 'Unexpected error',
-                  action: { label: 'Understood', onClick: () => {} },
+                  duration: Infinity,
+                  action: { label: 'Dismiss', onClick: () => {} },
                 });
               }
             }}
