@@ -98,7 +98,6 @@ export default function PhotoUploader({
     if (!e.target.files) return;
 
     const picked = Array.from(e.target.files);
-    e.target.value = ''; // allow re-upload same file
 
     /**
      * The server refuses these too. Stopping them here just saves the host
@@ -116,6 +115,8 @@ export default function PhotoUploader({
         description: `Photos have to be under ${MAX_FILE_MB} MB each.`,
       });
     }
+
+    e.target.value = ''; // allow re-upload same file
 
     if (!accepted.length) return;
 

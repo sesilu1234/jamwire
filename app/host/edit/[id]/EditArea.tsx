@@ -120,7 +120,21 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
   //#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
   //#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-  const handleSave = async () => {
+  /**
+   * The real phases of a save, so the overlay can name what it is waiting on.
+   * The percentages are signposts, not measurements - what carries the
+   * information is the label, and the slowest stage says why it is slow.
+   */
+  const SAVE_STAGES = {
+    preparing: { label: 'Preparing your photos', progress: 20 },
+    uploading: { label: 'Compressing and uploading', progress: 65 },
+    done: { label: 'Saved', progress: 100 },
+  } as const;
+
+  type SaveStage = keyof typeof SAVE_STAGES;
+
+  const handleSave = async (onStage: (stage: SaveStage) => void) => {
+    onStage('preparing');
     childSaveOnUnmount.current();
 
     const form = useFormStore.getState().form;
@@ -182,6 +196,8 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
     payload.append('jamColumns', JSON.stringify(jamData));
     images_files.forEach((file) => payload.append('images', file));
 
+    onStage('uploading');
+
     const res = await fetch(`/api/private/update-session/${id}`, {
       method: 'POST',
       body: payload, // ⬅️ solo FormData
@@ -203,7 +219,7 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
     return { success: true };
   };
 
-  const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<SaveStage>('preparing');
   const [saving, setSaving] = useState(false);
 
   if (loading)
@@ -220,17 +236,18 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
     <div className="flex min-h-screen flex-col">
       {saving ? (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-zinc-950/50 backdrop-blur-sm">
-          <div className="flex w-[280px] flex-col items-center gap-5 rounded-2xl border border-zinc-200 bg-white px-7 py-8 shadow-2xl">
+          <div className="flex w-[300px] flex-col items-center gap-5 rounded-2xl border border-zinc-200 bg-white px-7 py-8 shadow-2xl">
             <span className="h-7 w-7 animate-spin rounded-full border-2 border-zinc-200 border-t-amber-400" />
             <div className="text-center">
               <p className="text-[15px] font-semibold tracking-tight text-zinc-900">
                 Saving your changes
               </p>
               <p className="mt-1 text-[12px] text-zinc-500">
-                Hang tight, this takes a moment.
+                {SAVE_STAGES[stage].label}
+                {stage === 'done' ? '' : '…'}
               </p>
             </div>
-            <ProgressDemo progress={progress} setProgress={setProgress} />
+            <Progress value={SAVE_STAGES[stage].progress} className="w-full" />
           </div>
         </div>
       ) : null}
@@ -261,43 +278,38 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
             "
             disabled={saving}
             onClick={async () => {
-              setProgress(13);
+              setStage('preparing');
               setSaving(true);
 
-              const wait = (ms: number) =>
-                new Promise((r) => setTimeout(r, ms));
+              try {
+                const saveResult = await handleSave(setStage);
 
-              // run progress animation in parallel with save
-              const savePromise = handleSave(); // run but capture result
-              await Promise.all([
-                (async () => {
-                  await wait(500);
-                  setProgress(33);
-                  await wait(1000);
-                  setProgress(66);
-                })(),
-                savePromise,
-              ]);
+                if (!saveResult?.success) {
+                  setSaving(false);
+                  toast(
+                    saveResult?.message ?? 'Your changes could not be saved',
+                    { action: { label: 'Understood', onClick: () => {} } },
+                  );
+                  return; // only navigate if success
+                }
 
-              const saveResult = await savePromise; // handleSave should return { success: true/false }
-
-              if (!saveResult?.success) {
+                setStage('done');
+                await new Promise((r) => setTimeout(r, 400));
+                router.push('/host'); // only navigate if success
+              } catch (e) {
+                /**
+                 * Anything thrown in here used to escape the handler, which
+                 * left the overlay up for ever with no clue why - the failure
+                 * has to reach the user.
+                 */
+                console.error('Save failed:', e);
                 setSaving(false);
-                toast(saveResult.message, {
-                  description: '',
-                  action: {
-                    label: 'Understood',
-                    onClick: () => console.log('Understood'),
-                  },
+                toast('Your changes could not be saved', {
+                  description:
+                    e instanceof Error ? e.message : 'Unexpected error',
+                  action: { label: 'Understood', onClick: () => {} },
                 });
-                return; // only navigate if success
               }
-
-              await wait(200);
-              setProgress(100);
-              await wait(200);
-
-              router.push('/host'); // only navigate if success
             }}
           >
             {saving ? (
@@ -335,16 +347,6 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
 
 import { Progress } from '@/components/ui/progress';
 
-type ProgressDemoProps = {
-  progress: number;
-  setProgress: React.Dispatch<React.SetStateAction<number>>;
-};
-
-export function ProgressDemo({ progress, setProgress }: ProgressDemoProps) {
-  useEffect(() => {
-    const timer = setTimeout(() => setProgress(66), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return <Progress value={progress} className="w-full" />;
-}
+/* ProgressDemo lived here. It set its own progress on a timer, fighting the
+   value its parent passed in, and the bar it rendered was invisible against
+   the card. The overlay drives <Progress /> from the real save stages now. */

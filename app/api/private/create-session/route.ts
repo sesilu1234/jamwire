@@ -193,6 +193,11 @@ export async function POST(req: Request) {
     ]);
 
 
+    if (error) {
+      console.error('Create session insert error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     if (jamColumns.periodicity === 'manual') {
 
     
@@ -316,10 +321,9 @@ const getWeeklyDatesUTC = (geo_tz: string, targetDay: number, startTime: string)
     
 
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    // The insert is checked right where it happens now, so a failed insert no
+    // longer gets a full set of jam_dates written against a row that is not
+    // there. This trailing copy is unreachable.
     return NextResponse.json(data, { status: 200 });
   } catch (e) {
      console.log(e);
