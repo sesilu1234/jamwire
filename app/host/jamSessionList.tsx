@@ -53,17 +53,17 @@ export default function JamSessionList() {
             />
 
             <div className="mt-3 flex justify-end gap-2">
-             <button
-  onClick={async () => {
-    setShowPanelDelete(false);
-    await deleteJam(idToDelete!);
-    setIdToDelete(null);
-  }}
-  disabled={text.toLowerCase() !== 'delete'}
-  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-red-700 bg-red-600 px-4 text-sm font-bold tracking-tight text-white shadow-[3px_3px_0_0_rgba(185,28,28,0.45)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-red-700 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(185,28,28,0.45)] disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none"
->
-  Accept
-</button>
+              <button
+                onClick={async () => {
+                  setShowPanelDelete(false);
+                  await deleteJam(idToDelete!);
+                  setIdToDelete(null);
+                }}
+                disabled={text.toLowerCase() !== 'delete'}
+                className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-red-700 bg-red-600 px-4 text-sm font-bold tracking-tight text-white shadow-[3px_3px_0_0_rgba(185,28,28,0.45)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-red-700 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(185,28,28,0.45)] disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none"
+              >
+                Accept
+              </button>
 
               <button
                 onClick={() => setIdToDelete(null)}
@@ -92,7 +92,7 @@ export default function JamSessionList() {
         const res = await fetch('/api/private/get-user-jams');
         if (!res.ok) throw new Error('Failed to fetch jams');
         const data: Jam[] = await res.json();
-        
+
         setJams(data);
       } catch {
         console.log('Error while fetching');
@@ -103,34 +103,94 @@ export default function JamSessionList() {
     fetchJams();
   }, []);
 
+  /**
+   * One jam is the common case, and for that host a count reading "1 jam" and
+   * a second way to reach the same page are both noise. Both appear only once
+   * there is a list worth navigating.
+   */
+  const hasSeveral = jams.length > 1;
+
+  const header = (
+    <div className="ml-3 mt-8">
+      <div className="mt-6 ml-6 md:ml-24">
+        <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <h3 className="text-5xl font-extrabold tracking-tighter uppercase md:text-6xl">
+            Your jams
+          </h3>
+
+          {hasSeveral ? (
+            <Link
+              href="/host/create"
+              prefetch={false}
+              aria-label="Add a new jam"
+              className="
+              group inline-flex h-10 shrink-0 items-center gap-2
+              rounded-xl border border-[#1B1F2A] bg-white px-4
+              text-sm font-bold tracking-tight text-[#1B1F2A]
+              shadow-[3px_3px_0_0_rgba(27,31,42,0.45)]
+              transition-[transform,box-shadow] duration-150 ease-out
+              hover:shadow-[5px_5px_0_0_rgba(27,31,42,0.55)]
+              active:translate-x-0.5 active:translate-y-0.5
+              active:shadow-[1px_1px_0_0_rgba(27,31,42,0.45)]
+            "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 -960 960 960"
+                aria-hidden="true"
+                className="h-4 w-4 fill-current transition-transform duration-300 group-hover:rotate-90"
+              >
+                <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+              </svg>
+              Add jam
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="mt-4 flex items-center gap-4">
+          <span className="h-1 w-14 shrink-0 bg-brand" />
+          <p className="text-sm font-medium text-[#1B1F2A]/50">
+            {hasSeveral ? `${jams.length} jams · ` : ''}
+            Everything you&apos;ve put on the map.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading)
     return (
-      <div className="mt-10 flex flex-col gap-4">
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
+      <>
+        {header}
+        <div className="mt-10 flex flex-col gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </>
     );
 
   return (
-    <div className="mt-10 flex flex-col gap-4">
-      {jams.map((jam, i) => (
-        <Jam
-          key={i}
-          id={jam.id}
-          jam_title={jam.jam_title}
-          jam_adress={jam.location_address}
-          jam_image_src={jam.image}
-          jam_slug={jam.slug}
-          is_validated={jam.validated}
-          deleteJam={setIdToDelete}
-        />
-      ))}
+    <>
+      {header}
+      <div className="mt-10 flex flex-col gap-4">
+        {jams.map((jam, i) => (
+          <Jam
+            key={i}
+            id={jam.id}
+            jam_title={jam.jam_title}
+            jam_adress={jam.location_address}
+            jam_image_src={jam.image}
+            jam_slug={jam.slug}
+            is_validated={jam.validated}
+            deleteJam={setIdToDelete}
+          />
+        ))}
 
-      <div className="mt-6 mx-auto container flex justify-center">
-        <Link
-          href="/host/create"
-          prefetch={false}
-          className="
+        <div className="mt-6 mx-auto container flex justify-center">
+          <Link
+            href="/host/create"
+            prefetch={false}
+            className="
       group relative flex items-center justify-center
       h-24 md:h-24 w-3/10 min-w-[200px] max-w-[320px]
       rounded-2xl
@@ -141,13 +201,13 @@ export default function JamSessionList() {
       active:translate-x-0.5 active:translate-y-0.5
       active:shadow-[2px_2px_0_0_rgba(27,31,42,0.5)]
     "
-        >
-          {/* Subtle Inner Glow */}
-          <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/[0.03] pointer-events-none" />
+          >
+            {/* Subtle Inner Glow */}
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/[0.03] pointer-events-none" />
 
-          <div className="flex items-center gap-4">
-            <div
-             className="
+            <div className="flex items-center gap-4">
+              <div
+                className="
   relative flex h-10 w-10 items-center justify-center 
   rounded-xl bg-zinc-900/00 border-2 text-black
   transition-all duration-500 ease-spring
@@ -158,21 +218,22 @@ export default function JamSessionList() {
   group-active:bg-brand
   group-active:rotate-90
 "
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 -960 960 960"
-                className="w-6 h-6 fill-current"
               >
-                <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
-              </svg>
-            </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 -960 960 960"
+                  className="w-6 h-6 fill-current"
+                >
+                  <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                </svg>
+              </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm md:text-base font-semibold tracking-tight text-zinc-900">
-                Add new jam
-              </span>
-              <span className="
+              <div className="flex flex-col">
+                <span className="text-sm md:text-base font-semibold tracking-tight text-zinc-900">
+                  Add new jam
+                </span>
+                <span
+                  className="
   text-xs text-zinc-500
   opacity-0 -translate-y-1
   transition-all duration-300
@@ -182,16 +243,18 @@ export default function JamSessionList() {
   
   group-active:opacity-100
   group-active:translate-y-0
-">
-                Start a session
-              </span>
+"
+                >
+                  Start a session
+                </span>
+              </div>
             </div>
-          </div>
-        </Link>
-      </div>
+          </Link>
+        </div>
 
-      {idToDelete ? <DeleteConfirmation /> : null}
-    </div>
+        {idToDelete ? <DeleteConfirmation /> : null}
+      </div>
+    </>
   );
 }
 
@@ -213,7 +276,6 @@ import {
 } from '@/components/ui/popover';
 
 import { ButtonGroup } from '@/components/ui/button-group';
-
 
 function Jam({
   id,

@@ -56,33 +56,24 @@ export default async function Home() {
             </div>
           </Link>
 
-     <div className="flex items-center gap-3 px-4 py-2.5 mx-auto w-fit border border-white/10 bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-xl transition-all hover:bg-zinc-900">
-  
-  {/* Ultra-Slow Status Indicator */}
-  <div className="relative flex h-2 w-2 items-center justify-center">
-    {/* The Ping (Slowed down to 3 seconds) */}
-    <span 
-      className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping"
-      style={{ animationDuration: '5s' }} 
-    />
-    {/* The Core Dot */}
-    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
-  </div>
-
-  <h3 className="text-sm font-medium text-zinc-400 tracking-tight">
-    Welcome back, <span className="text-zinc-100 font-bold ml-1">{session.user?.display_name}</span>
-  </h3>
-</div>
-          <div className="mt-6 ml-6 md:ml-24">
-            <h3 className="text-5xl font-extrabold tracking-tighter uppercase md:text-6xl">
-              Your jams
-            </h3>
-            <div className="mt-4 flex items-center gap-4">
-              <span className="h-1 w-14 shrink-0 bg-brand" />
-              <p className="text-sm font-medium text-[#1B1F2A]/50">
-                Everything you&apos;ve put on the map.
-              </p>
+          <div className="flex items-center gap-3 px-4 py-2.5 mx-auto w-fit border border-white/10 bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-xl transition-all hover:bg-zinc-900">
+            {/* Ultra-Slow Status Indicator */}
+            <div className="relative flex h-2 w-2 items-center justify-center">
+              {/* The Ping (Slowed down to 3 seconds) */}
+              <span
+                className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping"
+                style={{ animationDuration: '5s' }}
+              />
+              {/* The Core Dot */}
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
             </div>
+
+            <h3 className="text-sm font-medium text-zinc-400 tracking-tight">
+              Welcome back,{' '}
+              <span className="text-zinc-100 font-bold ml-1">
+                {session.user?.display_name}
+              </span>
+            </h3>
           </div>
         </div>
 
