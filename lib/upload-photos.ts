@@ -1,4 +1,14 @@
 import { randomUUID } from 'crypto';
+/**
+ * Pinned in package.json to the exact version Next depends on (`pnpm why
+ * sharp`), and not by accident.
+ *
+ * Next loads its own sharp for image optimisation. Two sharp versions in one
+ * process means two libvips builds, the second one fails to link against the
+ * first, and the route dies with ERR_DLOPEN_FAILED before its try/catch ever
+ * runs - which surfaces as an HTML 500 rather than a JSON error. If a Next
+ * upgrade moves its sharp, move this one with it.
+ */
 import sharp from 'sharp';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 

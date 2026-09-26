@@ -46,6 +46,28 @@ const SECTION_META: Record<string, { title: string; hint: string }> = {
   },
 };
 
+/**
+ * Whatever the server said, in a form that can be shown to a person.
+ *
+ * res.json() throws outright on an HTML error page or an empty body, which is
+ * exactly when something has gone wrong and you most want to read the reply.
+ */
+async function describeFailure(res: Response) {
+  const body = await res.text().catch(() => '');
+
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed?.error) return `${res.status}: ${parsed.error}`;
+  } catch {
+    // Not JSON - fall through and show the raw start of the body.
+  }
+
+  const snippet = body.replace(/\s+/g, ' ').trim().slice(0, 300);
+  return snippet
+    ? `${res.status}: ${snippet}`
+    : `${res.status} ${res.statusText}`;
+}
+
 export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
   const setForm = useFormStore((state) => state.setForm);
 
@@ -198,11 +220,13 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
       method: 'POST',
       body: payload, // ⬅️ solo FormData
     });
-    const data = await res.json();
 
     if (!res.ok) {
-      return { success: false, message: data.error };
+      const message = await describeFailure(res);
+      console.error('create-session failed ->', message);
+      return { success: false, message };
     }
+
     return { success: true };
   };
 
@@ -268,10 +292,8 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
                   toast(
                     saveResult?.message ?? 'Your jam could not be published',
                     {
-                      action: {
-                        label: 'Understood',
-                        onClick: () => {},
-                      },
+                      duration: Infinity,
+                      action: { label: 'Dismiss', onClick: () => {} },
                     },
                   );
                   return; // only navigate if success
@@ -291,7 +313,8 @@ export default function EditArea({ childSaveOnUnmount }: EditAreaProps) {
                 toast('Your jam could not be published', {
                   description:
                     e instanceof Error ? e.message : 'Unexpected error',
-                  action: { label: 'Understood', onClick: () => {} },
+                  duration: Infinity,
+                  action: { label: 'Dismiss', onClick: () => {} },
                 });
               }
             }}
