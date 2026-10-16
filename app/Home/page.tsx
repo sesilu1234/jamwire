@@ -2,6 +2,7 @@
 import { headers, cookies } from 'next/headers';
 import { getHomeCards } from '@/lib/getHomeCards';
 import { getRecentJams } from '@/lib/getRecentJams';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import HomeComponent from './HomeComponent'; 
 import { JamCard } from '@/types/jam';
 import { Metadata } from 'next';
@@ -67,15 +68,41 @@ export default async function HomePage() {
       : { city: 'Madrid, Spain', latitude: 40.4168, longitude: -3.7038 };
   }
 
-  const homeCards = await getHomeCards({
+  const cardParams = {
     dateOptions: 'week',
-    lat: userLocation.latitude,
-    lng: userLocation.longitude,
     distance: '60',
     styles: JSON.stringify([]),
     modality: JSON.stringify(['jam', 'open_mic']),
     order: 'soonest',
+  };
+
+  let homeCards = await getHomeCards({
+    ...cardParams,
+    lat: userLocation.latitude,
+    lng: userLocation.longitude,
   });
+
+  /**
+   * IP geolocation can land on a village with nothing in range (a whole ISP's
+   * WiFi resolving to Aínsa, say). Rather than an empty home, recentre on the
+   * closest jam that is still running. Server-side, so no redirect or flash.
+   */
+  if (!homeCards?.length) {
+    const { data: nearest, error } = await supabaseAdmin
+      .rpc('nearest_active_jam', { p_lat: userLocation.latitude, p_lng: userLocation.longitude })
+      .maybeSingle<{ city: string | null; country: string | null; lat: number; lng: number }>();
+
+    if (error) console.error('nearest_active_jam failed:', error.message);
+
+    if (nearest) {
+      userLocation = {
+        city: [nearest.city, nearest.country].filter(Boolean).join(', ') || userLocation.city,
+        latitude: nearest.lat,
+        longitude: nearest.lng,
+      };
+      homeCards = await getHomeCards({ ...cardParams, lat: nearest.lat, lng: nearest.lng });
+    }
+  }
 
   const validJams = homeCards?.slice(0, 20).filter((jam) => jam.slug && jam.jam_title) || [];
 
