@@ -2,12 +2,18 @@ name: Supabase SQL Dump
 
 on:
   schedule:
-    - cron: '0 2 * * *' # every night at 2 AM
+    - cron: '0 2 * * *' # every night at 2 AM UTC
   workflow_dispatch:
 
 jobs:
   backup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04 # pinned: you choose when to jump images, not GitHub
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: 'eu-north-1'
+      S3_PREFIX: s3://jamspots-pg-dump/backups/
 
     steps:
       - name: Install AWS CLI
@@ -22,22 +28,22 @@ jobs:
 
       - name: Install Postgres 17 client
         run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          sudo curl -fsSL -o /etc/apt/keyrings/postgresql.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/etc/apt/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
 
       - name: Use Postgres 17
         run: |
-          echo "/usr/lib/postgresql/17/bin" >> $GITHUB_PATH
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
           /usr/lib/postgresql/17/bin/pg_dump --version   # should show 17.x
 
       - name: Dump Supabase DB and upload to S3
         env:
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'eu-north-1'
         run: |
           set -euo pipefail
           DATE=$(date +%F-%H%M%S)
@@ -52,23 +58,33 @@ jobs:
           ls -lh "$DUMP_FILE"
 
           echo "Uploading dump to S3..."
-          aws s3 cp "$DUMP_FILE" s3://jamspots-pg-dump/backups/
+          aws s3 cp "$DUMP_FILE" "$S3_PREFIX"
 
           echo "Cleaning up local dump..."
           rm "$DUMP_FILE"
 
       - name: Remove old backups from S3 (keep 15 latest)
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'eu-north-1'
         run: |
+          set -euo pipefail
           echo "Deleting old backups..."
-          aws s3 ls s3://jamspots-pg-dump/backups/ \
+          aws s3 ls "$S3_PREFIX" \
             | awk '{print $4}' \
             | grep '^dump_' \
             | sort \
             | head -n -15 \
-            | while read f; do
-                [ -n "$f" ] && aws s3 rm s3://jamspots-pg-dump/backups/$f
-              done
+            | while read -r f; do
+                [ -n "$f" ] && aws s3 rm "${S3_PREFIX}${f}"
+              done || true   # grep exits 1 when there are no dumps yet; don't fail on that
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+        run: |
+          if [ -n "${ALERT_WEBHOOK:-}" ]; then
+            curl -fsS -X POST "$ALERT_WEBHOOK" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\":\"❌ Jamwire DB backup failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          else
+            echo "ALERT_WEBHOOK not set, skipping alert"
+          fi
